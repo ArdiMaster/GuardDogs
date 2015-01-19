@@ -2,7 +2,6 @@ package org.bitbucket.ardimaster.guarddogs;
 
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -64,10 +63,12 @@ public class GuardDogs extends JavaPlugin {
         guards.remove(wolf);
         logMessage("A guard dog has been destroyed: " + wolf.getUniqueId().toString());
         saveGuards();
-        if (!(wolf.getOwner() instanceof OfflinePlayer)) {
+        if ((wolf.getOwner() instanceof Player)) {
             Player player = (Player) wolf.getOwner();
-            player.sendMessage(ChatColor.WHITE + "One of your " + ChatColor.GREEN + "Guard Dogs" +
-                    ChatColor.WHITE + " has died.");
+            if (player.isOnline()) {
+                player.sendMessage(ChatColor.WHITE + "One of your " + ChatColor.GREEN + "Guard Dogs" +
+                        ChatColor.WHITE + " has died.");
+            }
         }
     }
 
