@@ -55,21 +55,34 @@ public class GuardDogs extends JavaPlugin {
         return true;
     }
 
-    public void destroyGuard(Wolf wolf) {
+    public void deadGuard(Wolf wolf) {
         if (!guards.contains(wolf)) {
             return;
         }
 
         guards.remove(wolf);
-        logMessage("A guard dog has been destroyed: " + wolf.getUniqueId().toString());
+        logMessage("A guard dog has died: " + wolf.getUniqueId().toString());
         saveGuards();
         if ((wolf.getOwner() instanceof Player)) {
             Player player = (Player) wolf.getOwner();
             if (player.isOnline()) {
-                player.sendMessage(ChatColor.WHITE + "One of your " + ChatColor.GREEN + "Guard Dogs" +
-                        ChatColor.WHITE + " has died.");
+                player.sendMessage(ChatColor.RED + "One of your " + ChatColor.DARK_GREEN + "Guard Dogs" +
+                        ChatColor.RED + " has died.");
             }
         }
+    }
+
+    public boolean removeGuard(Wolf wolf, Player player) {
+        if (!guards.contains(wolf)) {
+            return false;
+        }
+
+        guards.remove(wolf);
+        logMessage("A guard dog has been removed: " + wolf.getUniqueId().toString());
+        saveGuards();
+        player.sendMessage(ChatColor.WHITE + "One of your " + ChatColor.GREEN + "Guard Dogs" +
+                ChatColor.WHITE + " has died.");
+        return true;
     }
 
     public void saveGuards() {
