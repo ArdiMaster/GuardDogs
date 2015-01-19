@@ -16,7 +16,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -101,14 +100,13 @@ public class GuardDogs extends JavaPlugin {
         }
 
         FileConfiguration config = YamlConfiguration.loadConfiguration(guardFile);
-        Iterator<Wolf> wolfIterator = guards.iterator();
         List<String> guardIds = new ArrayList<>();
-        while (wolfIterator.hasNext()) {
-            Wolf wolf = wolfIterator.next();
-            guardIds.add(wolf.getUniqueId().toString());
 
+        for (Wolf wolf : guards) {
+            guardIds.add(wolf.getUniqueId().toString());
         }
-        config.set("guards",guardIds);
+
+        config.set("guards", guardIds);
         try {
             config.save(guardFile);
         } catch (IOException e) {
@@ -127,21 +125,14 @@ public class GuardDogs extends JavaPlugin {
         FileConfiguration config = YamlConfiguration.loadConfiguration(guardFile);
         List<String> guardIds = config.getStringList("guards");
 
-        Iterator<World> worldIterator = getServer().getWorlds().iterator();
-        while (worldIterator.hasNext()) { // All worlds on server
-            World world = worldIterator.next();
-
-            Iterator<LivingEntity> entityIterator = world.getLivingEntities().iterator();
-            while (entityIterator.hasNext()) { // All living entities in world
-                LivingEntity entity = entityIterator.next();
-
-                if(entity instanceof Wolf){
+        for (World world : getServer().getWorlds()) {
+            for (LivingEntity entity : world.getLivingEntities()) {
+                if (entity instanceof Wolf) {
                     if (guardIds.contains(entity.getUniqueId().toString())) {
                         createGuard((Wolf) entity);
                     }
                 }
             }
         }
-
     }
 }
