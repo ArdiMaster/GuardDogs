@@ -15,6 +15,7 @@ import org.bukkit.potion.PotionEffectType;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -25,6 +26,7 @@ public class GuardDogs extends JavaPlugin {
 
     protected String guardFileName = "guards";
     protected HashSet<Wolf> guards = new HashSet<>();
+    protected HashMap<Wolf, LivingEntity> guardTargets = new HashMap<>();
 
     @Override
     public void onEnable() {
@@ -62,7 +64,7 @@ public class GuardDogs extends JavaPlugin {
         guards.remove(wolf);
         logMessage("A guard dog has died: " + wolf.getUniqueId().toString());
         saveGuards();
-        if ((wolf.getOwner() instanceof Player)) {
+        if (wolf.getOwner() instanceof Player) {
             Player player = (Player) wolf.getOwner();
             if (player.isOnline()) {
                 player.sendMessage(ChatColor.RED + "One of your " + ChatColor.DARK_GREEN + "Guard Dogs" +

@@ -2,13 +2,19 @@ package org.bitbucket.ardimaster.guarddogs;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 /**
  * Created by ArdiMaster on 19.01.15.
@@ -40,11 +46,14 @@ public class EventListener implements Listener {
                 return;
             }
 
-            if (!plugin.createGuard(wolf)) {
-                return;
+            if (plugin.createGuard(wolf)) {
+                player.getInventory().removeItem(new ItemStack(Material.PUMPKIN_SEEDS, 1));
+                player.sendMessage(ChatColor.DARK_GREEN + "Guard dog" + ChatColor.GREEN + " ready for action");
+                wolf.setSitting(true);
+            } else {
+                player.sendMessage(ChatColor.RED + "This is already your guard dog!");
             }
-            player.getInventory().removeItem(new ItemStack(Material.PUMPKIN_SEEDS, 1));
-            player.sendMessage(ChatColor.DARK_GREEN + "Guard dog" + ChatColor.GREEN + " ready for action");
+
         } else if (player.getItemInHand().getType().equals(Material.STICK)) {
             if (!wolf.isTamed() || !wolf.getOwner().equals(player)) {
                 player.sendMessage(ChatColor.RED + "This isn't your dog. Thus, it can't be your guard dog. " +
@@ -70,7 +79,29 @@ public class EventListener implements Listener {
         plugin.deadGuard(wolf);
     }
 
-    /*
-    TODO: Create a listener and have guard dogs attack nearby players. IDK how to do this yet.
-    */
+    // TODO: Move to syncRepeatedTask running every 5 Ticks and extend.
+    @EventHandler
+    public void onPlayerMove(PlayerMoveEvent event) {
+        Player player = event.getPlayer();
+        LivingEntity playerEntity = player;
+        ArrayList<LivingEntity> near = new ArrayList<>();
+        Random rand = new Random();
+        double radius = 15d;
+
+        for (Wolf wolf : plugin.guards) {
+            if (!wolf.isSitting()) {
+                continue;
+            }
+
+            List<LivingEntity> all = wolf.getLocation().getWorld().getLivingEntities();
+
+            for (LivingEntity e : all) {
+                if (e.getLocation().distance(wolf.getLocation()) <= radius)
+                    near.add(e);
+            }
+
+            LivingEntity target = near.get(rand.nextInt(near.size()));
+            plugin.guardTargets.put(wolf, target);
+        }
+    }
 }
