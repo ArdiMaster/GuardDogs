@@ -72,11 +72,12 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onEntityDeath(EntityDeathEvent event){
-        if (!(event.getEntity() instanceof Wolf))
-            return;
+        if (event.getEntity() instanceof Wolf) {
+            Wolf wolf = (Wolf) event.getEntity();
+            plugin.deadGuard(wolf);
+        }
 
-        Wolf wolf = (Wolf) event.getEntity();
-        plugin.deadGuard(wolf);
+
     }
 
     // TODO: Move to syncRepeatedTask running every 5 Ticks and extend.
@@ -96,15 +97,18 @@ public class EventListener implements Listener {
             List<LivingEntity> all = wolf.getLocation().getWorld().getLivingEntities();
 
             for (LivingEntity e : all) {
-                if (e.getLocation().distance(wolf.getLocation()) <= radius)
+                if (e.getLocation().distance(wolf.getLocation()) <= radius) {
                     if (wolf.getOwner().equals(player) && e.equals(playerEntity)) {
                         continue;
                     }
                     near.add(e);
+                }
             }
 
             LivingEntity target = near.get(rand.nextInt(near.size()));
             plugin.guardTargets.put(wolf, target);
+            wolf.setSitting(false);
+            wolf.damage(0d, target);
         }
     }
 }
