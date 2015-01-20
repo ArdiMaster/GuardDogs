@@ -97,6 +97,9 @@ public class EventListener implements Listener {
 
             for (LivingEntity e : all) {
                 if (e.getLocation().distance(wolf.getLocation()) <= radius)
+                    if (wolf.getOwner().equals(player) && e.equals(playerEntity)) {
+                        continue;
+                    }
                     near.add(e);
             }
 
