@@ -83,6 +83,7 @@ public class EventListener implements Listener {
                 if (plugin.guardTargets.get(wolf).equals(deadEntity)) {
                     wolf.setSitting(true);
                     // TODO: Teleport guard back to its original location
+                    break;
                 }
             }
         }
