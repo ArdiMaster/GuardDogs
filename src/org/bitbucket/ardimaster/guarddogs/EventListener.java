@@ -77,7 +77,15 @@ public class EventListener implements Listener {
             plugin.deadGuard(wolf);
         }
 
-
+        LivingEntity deadEntity = event.getEntity();
+        if (plugin.guardTargets.containsValue(deadEntity)) {
+            for (Wolf wolf : plugin.guards) {
+                if (plugin.guardTargets.get(wolf).equals(deadEntity)) {
+                    wolf.setSitting(true);
+                    // TODO: Teleport guard back to its original location
+                }
+            }
+        }
     }
 
     // TODO: Move to syncRepeatedTask running every 5 Ticks and extend.
@@ -100,6 +108,12 @@ public class EventListener implements Listener {
                 if (e.getLocation().distance(wolf.getLocation()) <= radius) {
                     if (wolf.getOwner().equals(player) && e.equals(playerEntity)) {
                         continue;
+                    }
+
+                    if (e instanceof Wolf) {
+                        if (plugin.guards.contains(e)) {
+                            continue;
+                        }
                     }
                     near.add(e);
                 }
