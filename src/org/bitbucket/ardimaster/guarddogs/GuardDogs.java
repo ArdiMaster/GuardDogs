@@ -12,6 +12,7 @@ import org.bukkit.entity.Wolf;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,15 +30,18 @@ public class GuardDogs extends JavaPlugin {
     protected HashSet<Wolf> guards = new HashSet<>();
     protected HashMap<Wolf, LivingEntity> guardTargets = new HashMap<>();
     protected HashMap<Wolf, Location> guardPositions = new HashMap<>();
+    private BukkitTask targetDeterminer;
 
     @Override
     public void onEnable() {
         loadGuards();
+        targetDeterminer = new TargetDeterminer(this).runTaskTimer(this, 30 * 20, 10);
         getServer().getPluginManager().registerEvents(new EventListener(this), this);
     }
 
     @Override
     public void onDisable() {
+        targetDeterminer.cancel();
         saveGuards();
     }
 
@@ -51,7 +55,7 @@ public class GuardDogs extends JavaPlugin {
         }
         guards.add(wolf);
         wolf.setCollarColor(DyeColor.LIME);
-        wolf.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION,300,1));
+        wolf.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 300, 1));
         logMessage("A new guard dog has been created: " + wolf.getUniqueId().toString());
         saveGuards();
         return true;

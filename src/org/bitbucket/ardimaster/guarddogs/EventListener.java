@@ -9,12 +9,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 
 /**
  * Created by ArdiMaster on 19.01.15.
@@ -23,7 +18,7 @@ public class EventListener implements Listener {
     protected GuardDogs plugin;
 
     public EventListener(GuardDogs plugin) {
-        this.plugin =   plugin;
+        this.plugin = plugin;
     }
 
     @EventHandler
@@ -89,44 +84,6 @@ public class EventListener implements Listener {
                     wolf.teleport(plugin.guardPositions.get(wolf));
                 }
             }
-        }
-    }
-
-    // TODO: Move to syncRepeatedTask running every 5 Ticks and extend.
-    @EventHandler
-    public void onPlayerMove(PlayerMoveEvent event) {
-        Player player = event.getPlayer();
-        LivingEntity playerEntity = player;
-        ArrayList<LivingEntity> near = new ArrayList<>();
-        Random rand = new Random();
-        double radius = 15d;
-
-        for (Wolf wolf : plugin.guards) {
-            if (!wolf.isSitting()) {
-                continue;
-            }
-
-            List<LivingEntity> all = wolf.getLocation().getWorld().getLivingEntities();
-
-            for (LivingEntity e : all) {
-                if (e.getLocation().distance(wolf.getLocation()) <= radius) {
-                    if (wolf.getOwner().equals(player) && e.equals(playerEntity)) {
-                        continue;
-                    }
-
-                    if (e instanceof Wolf) {
-                        if (plugin.guards.contains(e)) {
-                            continue;
-                        }
-                    }
-                    near.add(e);
-                }
-            }
-
-            LivingEntity target = near.get(rand.nextInt(near.size()));
-            plugin.guardTargets.put(wolf, target);
-            wolf.setSitting(false);
-            wolf.damage(0d, target);
         }
     }
 }
