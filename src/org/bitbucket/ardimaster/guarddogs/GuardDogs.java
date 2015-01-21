@@ -151,6 +151,7 @@ public class GuardDogs extends JavaPlugin {
                         Location pos = new Location(posWorld, X, Y, Z);
                         entity.teleport(pos);
                         guardPositions.put((Wolf) entity, pos);
+                        ((Wolf) entity).setSitting(true);
                     }
                 }
             }
