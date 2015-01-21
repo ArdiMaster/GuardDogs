@@ -2,6 +2,7 @@ package org.bitbucket.ardimaster.guarddogs;
 
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -27,6 +28,7 @@ public class GuardDogs extends JavaPlugin {
     protected String guardFileName = "guards";
     protected HashSet<Wolf> guards = new HashSet<>();
     protected HashMap<Wolf, LivingEntity> guardTargets = new HashMap<>();
+    protected HashMap<Wolf, Location> guardPositions = new HashMap<>();
 
     @Override
     public void onEnable() {
@@ -37,7 +39,6 @@ public class GuardDogs extends JavaPlugin {
     @Override
     public void onDisable() {
         saveGuards();
-
     }
 
     public void logMessage(String message) {
@@ -87,7 +88,7 @@ public class GuardDogs extends JavaPlugin {
     }
 
     public void saveGuards() {
-        File guardFile  =   new File(getDataFolder(),guardFileName);
+        File guardFile = new File(getDataFolder(), guardFileName);
         if (guardFile.exists()) {
             guardFile.delete();
         }
@@ -105,7 +106,13 @@ public class GuardDogs extends JavaPlugin {
         List<String> guardIds = new ArrayList<>();
 
         for (Wolf wolf : guards) {
-            guardIds.add(wolf.getUniqueId().toString());
+            String id = wolf.getUniqueId().toString();
+            Location loc = guardPositions.get(wolf);
+            guardIds.add(id);
+            config.set(id + ".world", loc.getWorld().getName());
+            config.set(id + ".X", loc.getBlockX());
+            config.set(id + ".Y", loc.getBlockY());
+            config.set(id + ".Z", loc.getBlockZ());
         }
 
         config.set("guards", guardIds);
@@ -132,6 +139,14 @@ public class GuardDogs extends JavaPlugin {
                 if (entity instanceof Wolf) {
                     if (guardIds.contains(entity.getUniqueId().toString())) {
                         createGuard((Wolf) entity);
+                        String uuid = entity.getUniqueId().toString();
+                        World posWorld = getServer().getWorld((String) config.get(uuid + ".world"));
+                        int X = Integer.parseInt((String) config.get(uuid + ".X"));
+                        int Y = Integer.parseInt((String) config.get(uuid + ".Y"));
+                        int Z = Integer.parseInt((String) config.get(uuid + ".Z"));
+                        Location pos = new Location(posWorld, X, Y, Z);
+                        entity.teleport(pos);
+                        guardPositions.put((Wolf) entity, pos);
                     }
                 }
             }

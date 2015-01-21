@@ -49,6 +49,7 @@ public class EventListener implements Listener {
             if (plugin.createGuard(wolf)) {
                 player.getInventory().removeItem(new ItemStack(Material.PUMPKIN_SEEDS, 1));
                 player.sendMessage(ChatColor.DARK_GREEN + "Guard dog" + ChatColor.GREEN + " ready for action");
+                plugin.guardPositions.put(wolf, wolf.getLocation());
                 wolf.setSitting(true);
             } else {
                 player.sendMessage(ChatColor.RED + "This is already your guard dog!");
@@ -62,6 +63,7 @@ public class EventListener implements Listener {
             }
 
             if (plugin.removeGuard(wolf, player)) {
+                plugin.guardPositions.remove(wolf);
                 player.sendMessage(ChatColor.DARK_GREEN + "Guard dog " + ChatColor.AQUA + "disabled.");
             } else {
                 player.sendMessage(ChatColor.RED + "This isn't a guard dog, it's just a normal dog!");
@@ -75,6 +77,7 @@ public class EventListener implements Listener {
         if (event.getEntity() instanceof Wolf) {
             Wolf wolf = (Wolf) event.getEntity();
             plugin.deadGuard(wolf);
+            plugin.guardPositions.remove(wolf);
         }
 
         LivingEntity deadEntity = event.getEntity();
@@ -83,7 +86,7 @@ public class EventListener implements Listener {
                 if (plugin.guardTargets.get(wolf).equals(deadEntity)) {
                     wolf.setSitting(true);
                     plugin.guardTargets.remove(wolf);
-                    // TODO: Teleport guard back to its original location
+                    wolf.teleport(plugin.guardPositions.get(wolf));
                 }
             }
         }
