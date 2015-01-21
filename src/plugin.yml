@@ -1,0 +1,4 @@
+name: GuardDogs
+version: 0.1
+main: org.bitbucket.ardimaster.guarddogs.GuardDogs
+author: ArdiMaster
