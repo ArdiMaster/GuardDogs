@@ -30,18 +30,22 @@ public class GuardDogs extends JavaPlugin {
     protected HashSet<Wolf> guards = new HashSet<>();
     protected HashMap<Wolf, LivingEntity> guardTargets = new HashMap<>();
     protected HashMap<Wolf, Location> guardPositions = new HashMap<>();
+    protected HashMap<Wolf, Integer> guardWaits = new HashMap<>();
     private BukkitTask targetDeterminer;
+    private BukkitTask guardTicker;
 
     @Override
     public void onEnable() {
         loadGuards();
         targetDeterminer = new TargetDeterminer(this).runTaskTimer(this, 30 * 20, 10);
+        guardTicker = new GuardTicker(this).runTaskTimer(this, 15 * 20, 10);
         getServer().getPluginManager().registerEvents(new EventListener(this), this);
     }
 
     @Override
     public void onDisable() {
         targetDeterminer.cancel();
+        guardTicker.cancel();
         saveGuards();
     }
 
@@ -151,6 +155,7 @@ public class GuardDogs extends JavaPlugin {
                         Location pos = new Location(posWorld, X, Y, Z);
                         entity.teleport(pos);
                         guardPositions.put((Wolf) entity, pos);
+                        guardWaits.put((Wolf) entity, 40);
                         ((Wolf) entity).setSitting(true);
                     }
                 }

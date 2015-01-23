@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Created by adrianwelcker on 21.01.15.
+ * Created by ArdiMaster on 21.01.15.
  */
 public class TargetDeterminer extends BukkitRunnable {
     private final GuardDogs plugin;
@@ -25,7 +25,7 @@ public class TargetDeterminer extends BukkitRunnable {
         double radiusSquare = 15 * 15;
 
         for (Wolf wolf : plugin.guards) {
-            if (!wolf.isSitting()) {
+            if (!wolf.isSitting() || plugin.guardWaits.containsValue(wolf)) {
                 continue;
             }
 
