@@ -31,6 +31,7 @@ public class GuardDogs extends JavaPlugin {
     protected HashMap<Wolf, LivingEntity> guardTargets = new HashMap<>();
     protected HashMap<Wolf, Location> guardPositions = new HashMap<>();
     protected HashMap<Wolf, Integer> guardWaits = new HashMap<>();
+    protected boolean targetDetermination = false;
     private BukkitTask targetDeterminer;
     private BukkitTask guardTicker;
 

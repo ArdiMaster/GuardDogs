@@ -12,7 +12,7 @@ import java.util.Random;
  * Created by ArdiMaster on 21.01.15.
  */
 public class TargetDeterminer extends BukkitRunnable {
-    private final GuardDogs plugin;
+    private GuardDogs plugin;
 
     public TargetDeterminer(GuardDogs plugin) {
         this.plugin = plugin;
@@ -20,6 +20,8 @@ public class TargetDeterminer extends BukkitRunnable {
 
     @Override
     public void run() {
+        plugin.targetDetermination = true;
+
         ArrayList<LivingEntity> near = new ArrayList<>();
         Random rand = new Random();
         double radiusSquare = 15 * 15;
@@ -60,5 +62,7 @@ public class TargetDeterminer extends BukkitRunnable {
             wolf.setSitting(false);
             wolf.damage(0, target);
         }
+
+        plugin.targetDetermination = false;
     }
 }

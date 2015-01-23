@@ -2,11 +2,13 @@ package org.bitbucket.ardimaster.guarddogs;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemStack;
@@ -66,6 +68,22 @@ public class EventListener implements Listener {
             }
         }
 
+    }
+
+    @EventHandler
+    public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
+        if (plugin.targetDetermination) {
+            return;
+        }
+
+        if (event.getEntity() instanceof Wolf) {
+            Entity e = event.getEntity();
+            if (plugin.guards.contains(e)) {
+                if (!plugin.guardTargets.containsKey(e)) {
+                    event.setCancelled(true);
+                }
+            }
+        }
     }
 
     @EventHandler
