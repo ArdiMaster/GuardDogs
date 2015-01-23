@@ -46,7 +46,12 @@ public class TargetDeterminer extends BukkitRunnable {
                         }
                     }
 
-                    near.add(e);
+                    int yWolf = wolf.getLocation().getBlockY();
+                    int yE = e.getLocation().getBlockY();
+                    int yDelta = yE - yWolf;
+                    if (yDelta > -6 && yDelta < 6) {
+                        near.add(e);
+                    }
                 }
             }
 
