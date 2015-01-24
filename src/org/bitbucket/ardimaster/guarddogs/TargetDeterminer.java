@@ -25,7 +25,7 @@ public class TargetDeterminer extends BukkitRunnable {
         double radiusSquare = 15 * 15;
 
         for (Wolf wolf : plugin.guards) {
-            if (!wolf.isSitting() || plugin.guardWaits.containsValue(wolf)) {
+            if (!wolf.isSitting() || plugin.guardWaits.containsKey(wolf)) {
                 continue;
             }
 
@@ -53,6 +53,12 @@ public class TargetDeterminer extends BukkitRunnable {
                     int yDelta = yE - yWolf;
                     if (yDelta > -6 && yDelta < 6) {
                         if (e instanceof Player) {
+                            if (plugin.guardIgnores.containsKey(wolf)) {
+                                String p = ((Player) e).getName();
+                                if (plugin.guardIgnores.get(wolf).contains(p)) {
+                                    continue;
+                                }
+                            }
                             nearPlayers.add((Player) e);
                         } else {
                             if (!(e instanceof Sheep) && !(e instanceof Chicken) && !(e instanceof Cow) &&

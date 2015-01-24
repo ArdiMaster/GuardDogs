@@ -26,11 +26,13 @@ import java.util.List;
  */
 public class GuardDogs extends JavaPlugin {
 
-    protected String guardFileName = "guards";
+    protected String guardFileName = "guards.yml";
     protected HashSet<Wolf> guards = new HashSet<>();
     protected HashMap<Wolf, LivingEntity> guardTargets = new HashMap<>();
     protected HashMap<Wolf, Location> guardPositions = new HashMap<>();
     protected HashMap<Wolf, Integer> guardWaits = new HashMap<>();
+    protected HashMap<Wolf, HashSet<String>> guardIgnores = new HashMap<>();
+    protected HashMap<Player, Wolf> settingIgnore = new HashMap<>();
     protected boolean targetDetermination = false;
     private BukkitTask targetDeterminer;
     private BukkitTask guardTicker;
@@ -122,6 +124,14 @@ public class GuardDogs extends JavaPlugin {
             config.set(id + ".X", loc.getBlockX());
             config.set(id + ".Y", loc.getBlockY());
             config.set(id + ".Z", loc.getBlockZ());
+
+            if (guardIgnores.containsKey(wolf)) {
+                ArrayList<String> ignores = new ArrayList<>();
+                for (String s : guardIgnores.get(wolf)) {
+                    ignores.add(s);
+                }
+                config.set(id + ".ignores", ignores);
+            }
         }
 
         config.set("guards", guardIds);
@@ -147,7 +157,9 @@ public class GuardDogs extends JavaPlugin {
             for (LivingEntity entity : world.getLivingEntities()) {
                 if (entity instanceof Wolf) {
                     if (guardIds.contains(entity.getUniqueId().toString())) {
-                        createGuard((Wolf) entity);
+                        Wolf wolf = (Wolf) entity;
+                        createGuard(wolf);
+                        guardWaits.put(wolf, 40);
                         String uuid = entity.getUniqueId().toString();
                         World posWorld = getServer().getWorld((String) config.get(uuid + ".world"));
                         int X = Integer.parseInt((String) config.get(uuid + ".X"));
@@ -155,9 +167,16 @@ public class GuardDogs extends JavaPlugin {
                         int Z = Integer.parseInt((String) config.get(uuid + ".Z"));
                         Location pos = new Location(posWorld, X, Y, Z);
                         entity.teleport(pos);
-                        guardPositions.put((Wolf) entity, pos);
-                        guardWaits.put((Wolf) entity, 40);
+                        guardPositions.put(wolf, pos);
                         ((Wolf) entity).setSitting(true);
+                        if (config.contains(uuid + ".ignores")) {
+                            List<String> ignores = config.getStringList(uuid + ".ignores");
+                            HashSet<String> putIgnores = new HashSet<>();
+                            for (String s : ignores) {
+                                putIgnores.add(s);
+                            }
+                            guardIgnores.put(wolf, putIgnores);
+                        }
                     }
                 }
             }
