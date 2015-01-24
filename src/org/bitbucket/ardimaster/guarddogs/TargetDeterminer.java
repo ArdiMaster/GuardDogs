@@ -1,7 +1,6 @@
 package org.bitbucket.ardimaster.guarddogs;
 
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Wolf;
+import org.bukkit.entity.*;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
@@ -9,10 +8,10 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Created by adrianwelcker on 21.01.15.
+ * Created by ArdiMaster on 21.01.15.
  */
 public class TargetDeterminer extends BukkitRunnable {
-    private final GuardDogs plugin;
+    private GuardDogs plugin;
 
     public TargetDeterminer(GuardDogs plugin) {
         this.plugin = plugin;
@@ -20,16 +19,19 @@ public class TargetDeterminer extends BukkitRunnable {
 
     @Override
     public void run() {
-        ArrayList<LivingEntity> near = new ArrayList<>();
+        plugin.targetDetermination = true;
+
         Random rand = new Random();
         double radiusSquare = 15 * 15;
 
         for (Wolf wolf : plugin.guards) {
-            if (!wolf.isSitting()) {
+            if (!wolf.isSitting() || plugin.guardWaits.containsKey(wolf)) {
                 continue;
             }
 
             List<LivingEntity> all = wolf.getLocation().getWorld().getLivingEntities();
+            ArrayList<LivingEntity> near = new ArrayList<>();
+            ArrayList<Player> nearPlayers = new ArrayList<>();
 
             for (LivingEntity e : all) {
                 if (e.getLocation().distanceSquared(wolf.getLocation()) <= radiusSquare) {
@@ -46,14 +48,39 @@ public class TargetDeterminer extends BukkitRunnable {
                         }
                     }
 
-                    near.add(e);
+                    int yWolf = wolf.getLocation().getBlockY();
+                    int yE = e.getLocation().getBlockY();
+                    int yDelta = yE - yWolf;
+                    if (yDelta > -6 && yDelta < 6) {
+                        if (e instanceof Player) {
+                            if (plugin.guardIgnores.containsKey(wolf)) {
+                                String p = ((Player) e).getName();
+                                if (plugin.guardIgnores.get(wolf).contains(p)) {
+                                    continue;
+                                }
+                            }
+                            nearPlayers.add((Player) e);
+                        } else {
+                            if (!(e instanceof Sheep) && !(e instanceof Chicken) && !(e instanceof Cow) &&
+                                    !(e instanceof Pig) && !(e instanceof Horse)) {
+                                near.add(e);
+                            }
+                        }
+                    }
                 }
             }
 
-            LivingEntity target = near.get(rand.nextInt(near.size()));
+            LivingEntity target;
+            if (!nearPlayers.isEmpty()) {
+                target = nearPlayers.get(rand.nextInt(nearPlayers.size()));
+            } else {
+                target = near.get(rand.nextInt(near.size()));
+            }
             plugin.guardTargets.put(wolf, target);
             wolf.setSitting(false);
             wolf.damage(0, target);
         }
+
+        plugin.targetDetermination = false;
     }
 }
