@@ -103,8 +103,10 @@ public class TargetDeterminer extends BukkitRunnable {
             LivingEntity target;
             if (!nearPlayers.isEmpty()) {
                 target = nearPlayers.get(rand.nextInt(nearPlayers.size()));
-            } else {
+            } else if (!near.isEmpty()) {
                 target = near.get(rand.nextInt(near.size()));
+            } else {
+                continue;
             }
             plugin.guardTargets.put(wolf, target);
             wolf.setSitting(false);
