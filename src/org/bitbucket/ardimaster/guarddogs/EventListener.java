@@ -28,7 +28,6 @@
  * DAMAGE.
  */
 
-
 package org.bitbucket.ardimaster.guarddogs;
 
 import org.bukkit.ChatColor;
