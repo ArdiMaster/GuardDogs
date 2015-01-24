@@ -28,7 +28,6 @@
  * DAMAGE.
  */
 
-
 package org.bitbucket.ardimaster.guarddogs;
 
 import org.bukkit.ChatColor;
@@ -77,10 +76,10 @@ public class EventListener implements Listener {
                 return;
             }
 
+            plugin.guardPositions.put(wolf, wolf.getLocation());
             if (plugin.createGuard(wolf)) {
                 player.getInventory().removeItem(new ItemStack(Material.PUMPKIN_SEEDS, 1));
                 player.sendMessage(ChatColor.DARK_GREEN + "Guard dog" + ChatColor.GREEN + " ready for action");
-                plugin.guardPositions.put(wolf, wolf.getLocation());
                 plugin.guardWaits.put(wolf, 40);
                 wolf.setSitting(true);
             } else {
@@ -170,6 +169,15 @@ public class EventListener implements Listener {
 
         Player player = event.getPlayer();
         Wolf wolf = plugin.settingIgnore.get(player);
+
+        try {
+            Player ignore = plugin.getServer().getPlayer(event.getMessage());
+        } catch (NullPointerException e) {
+            player.sendMessage(ChatColor.RED + "This is not a player, or he/she isn't online!");
+            event.setCancelled(true);
+            return;
+        }
+
         if (!plugin.getServer().getPlayer(event.getMessage()).isOnline()) {
             player.sendMessage(ChatColor.RED + "This player is not online.");
             return;

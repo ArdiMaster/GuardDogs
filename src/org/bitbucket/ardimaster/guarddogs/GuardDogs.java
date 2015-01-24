@@ -46,6 +46,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -123,8 +124,6 @@ public class GuardDogs extends JavaPlugin {
         guards.remove(wolf);
         logMessage("A guard dog has been removed: " + wolf.getUniqueId().toString());
         saveGuards();
-        player.sendMessage(ChatColor.WHITE + "One of your " + ChatColor.GREEN + "Guard Dogs" +
-                ChatColor.WHITE + " has died.");
         return true;
     }
 
@@ -133,13 +132,19 @@ public class GuardDogs extends JavaPlugin {
         if (guardFile.exists()) {
             guardFile.delete();
         }
+
         if (guards.isEmpty()) {
             return;
         }
+
         try {
+            if (!Files.exists(getDataFolder().toPath())) {
+                Files.createDirectory(getDataFolder().toPath());
+            }
             guardFile.createNewFile();
         } catch (IOException e) {
             logMessage("Unable to create guard file!");
+            e.printStackTrace();
             return;
         }
 
@@ -174,7 +179,7 @@ public class GuardDogs extends JavaPlugin {
     }
 
     protected void loadGuards() {
-        File guardFile  =   new File(getDataFolder(),guardFileName);
+        File guardFile = new File(getDataFolder(), guardFileName);
         if (!guardFile.exists()) {
             logMessage("No guard file.");
             return;
@@ -195,6 +200,7 @@ public class GuardDogs extends JavaPlugin {
                         int X = Integer.parseInt((String) config.get(uuid + ".X"));
                         int Y = Integer.parseInt((String) config.get(uuid + ".Y"));
                         int Z = Integer.parseInt((String) config.get(uuid + ".Z"));
+                        //Location pos = new Location(wolf.getWorld(), X, Y, Z);
                         Location pos = new Location(posWorld, X, Y, Z);
                         entity.teleport(pos);
                         guardPositions.put(wolf, pos);
