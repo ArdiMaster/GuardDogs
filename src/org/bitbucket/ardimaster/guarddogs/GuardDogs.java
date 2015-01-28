@@ -31,6 +31,8 @@
 package org.bitbucket.ardimaster.guarddogs;
 
 import org.bukkit.*;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.LivingEntity;
@@ -270,5 +272,67 @@ public class GuardDogs extends JavaPlugin {
             disableMat = Material.getMaterial(config.getString("id.disable"));
             ignoreMat = Material.getMaterial(config.getString("id.ignore"));
         }
+    }
+
+    public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
+        if (cmd.getName().equalsIgnoreCase("guarddogs")) {
+            if (sender instanceof Player) {
+                if (!sender.hasPermission("guarddogs.admin")) {
+                    sender.sendMessage(ChatColor.RED + "Sorry, but you don't have permission to edit guard dogs iems.");
+                    return true;
+                }
+            }
+
+            if (args.length == 0) {
+                sender.sendMessage(ChatColor.GREEN + "You are running " + ChatColor.DARK_GREEN + "Guard Dogs" +
+                        ChatColor.GREEN + " version " + ChatColor.AQUA + getDescription().getVersion());
+                return true;
+            }
+
+            if (args.length != 2) {
+                sender.sendMessage(ChatColor.RED + "Usage: /guarddogs [create|disable|ignore] [Material]" +
+                        ChatColor.GRAY + " - " + ChatColor.GREEN + "Changes the item you need to right click a wolf " +
+                        "with in order to perform the specified action.");
+            }
+
+            if (args[0].equalsIgnoreCase("create")) {
+                Material tmp = Material.getMaterial(args[1]);
+                if (tmp != null) {
+                    createMat = tmp;
+                    sender.sendMessage(ChatColor.GREEN + "Material changed. From now on, right click a tamed wolf " +
+                            "with " + ChatColor.AQUA + args[1] + ChatColor.GREEN + " to make it a guard dog.");
+                } else {
+                    sender.sendMessage(ChatColor.RED + args[1] + " is not a valid material!");
+                }
+                return true;
+            } else if (args[0].equalsIgnoreCase("disable")) {
+                Material tmp = Material.getMaterial(args[1]);
+                if (tmp != null) {
+                    disableMat = tmp;
+                    sender.sendMessage(ChatColor.GREEN + "Material changed. From now on, right click a guard dog " +
+                            "with " + ChatColor.AQUA + args[1] + ChatColor.GREEN + " to disable it.");
+                } else {
+                    sender.sendMessage(ChatColor.RED + args[1] + " is not a valid material!");
+                }
+                return true;
+            } else if (args[0].equalsIgnoreCase("ignore")) {
+                Material tmp = Material.getMaterial(args[1]);
+                if (tmp != null) {
+                    ignoreMat = tmp;
+                    sender.sendMessage(ChatColor.GREEN + "Material changed. From now on, right click a guard dog " +
+                            "with " + ChatColor.AQUA + args[1] + ChatColor.GREEN + " to make it ignore a player.");
+                } else {
+                    sender.sendMessage(ChatColor.RED + args[1] + " is not a valid material!");
+                }
+                return true;
+            } else {
+                sender.sendMessage(ChatColor.RED + "Usage: /guarddogs [create|disable|ignore] [Material]" +
+                        ChatColor.GRAY + " - " + ChatColor.GREEN + "Changes the item you need to right click a wolf " +
+                        "with in order to perform the specified action.");
+                return true;
+            }
+        }
+
+        return false;
     }
 }
