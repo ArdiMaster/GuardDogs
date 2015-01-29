@@ -153,8 +153,14 @@ public class GuardDogs extends JavaPlugin {
         List<String> guardIds = new ArrayList<>();
 
         for (Wolf wolf : guards) {
+            logMessage("[DEBUG] Current wolf is " + wolf.toString());
             String id = wolf.getUniqueId().toString();
+            logMessage("[DEBUG] Wolf's location is " + guardPositions.get(wolf));
             Location loc = guardPositions.get(wolf);
+            if (loc == null) {
+                throw new AssertionError("Attempting to save a guard dog whose position is null! Something went " +
+                        "terribly wrong here.");
+            }
             guardIds.add(id);
             config.set("guards." + id + ".world", loc.getWorld().getName());
             config.set("guards." + id + ".X", loc.getBlockX());
@@ -219,13 +225,17 @@ public class GuardDogs extends JavaPlugin {
             guardIds = config.getStringList("guards");
         }
 
+        if (newConfig) {
+            createMat = Material.getMaterial(config.getString("id.create"));
+            disableMat = Material.getMaterial(config.getString("id.disable"));
+            ignoreMat = Material.getMaterial(config.getString("id.ignore"));
+        }
+
         for (World world : getServer().getWorlds()) {
             for (LivingEntity entity : world.getLivingEntities()) {
                 if (entity instanceof Wolf) {
                     if (guardIds.contains(entity.getUniqueId().toString())) {
                         Wolf wolf = (Wolf) entity;
-                        createGuard(wolf);
-                        guardWaits.put(wolf, 40);
                         String uuid = wolf.getUniqueId().toString();
 
                         World posWorld;
@@ -245,6 +255,8 @@ public class GuardDogs extends JavaPlugin {
                         entity.teleport(pos);
                         guardPositions.put(wolf, pos);
                         wolf.setSitting(true);
+                        createGuard(wolf);
+                        guardWaits.put(wolf, 40);
 
                         if (newConfig) {
                             if (config.contains("guards." + uuid + ".ignores")) {
@@ -269,12 +281,6 @@ public class GuardDogs extends JavaPlugin {
                     }
                 }
             }
-        }
-
-        if (newConfig) {
-            createMat = Material.getMaterial(config.getString("id.create"));
-            disableMat = Material.getMaterial(config.getString("id.disable"));
-            ignoreMat = Material.getMaterial(config.getString("id.ignore"));
         }
     }
 

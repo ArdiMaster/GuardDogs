@@ -143,7 +143,7 @@ public class EventListener implements Listener {
     }
 
     @EventHandler
-    public void onEntityDeath(EntityDeathEvent event){
+    public void onEntityDeath(EntityDeathEvent event) {
         if (event.getEntity() instanceof Wolf) {
             Wolf wolf = (Wolf) event.getEntity();
             plugin.deadGuard(wolf);
