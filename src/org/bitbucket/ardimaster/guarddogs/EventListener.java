@@ -64,9 +64,6 @@ public class EventListener implements Listener {
         Wolf wolf = (Wolf) event.getRightClicked();
         Player player = event.getPlayer();
 
-        plugin.logMessage("[DEBUG] " + player.getName() + " right-clicked a wolf with " +
-                player.getItemInHand().getType().toString());
-
         if (player.getItemInHand().getType().equals(plugin.createMat)) {
             if (!wolf.isTamed()) {
                 player.sendMessage(ChatColor.RED + "You can't make this dog your guard dog as it isn't tamed!");
@@ -153,6 +150,9 @@ public class EventListener implements Listener {
         LivingEntity deadEntity = event.getEntity();
         if (plugin.guardTargets.containsValue(deadEntity)) {
             for (Wolf wolf : plugin.guards) {
+                if (!plugin.guardTargets.containsKey(wolf)) {
+                    continue;
+                }
                 if (plugin.guardTargets.get(wolf).equals(deadEntity)) {
                     plugin.guardWaits.put(wolf, 5 * 20);
                     wolf.setSitting(true);

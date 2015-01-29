@@ -153,9 +153,7 @@ public class GuardDogs extends JavaPlugin {
         List<String> guardIds = new ArrayList<>();
 
         for (Wolf wolf : guards) {
-            logMessage("[DEBUG] Current wolf is " + wolf.toString());
             String id = wolf.getUniqueId().toString();
-            logMessage("[DEBUG] Wolf's location is " + guardPositions.get(wolf));
             Location loc = guardPositions.get(wolf);
             if (loc == null) {
                 throw new AssertionError("Attempting to save a guard dog whose position is null! Something went " +
