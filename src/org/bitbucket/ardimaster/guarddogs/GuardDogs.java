@@ -30,10 +30,9 @@
 
 package org.bitbucket.ardimaster.guarddogs;
 
-import org.bukkit.ChatColor;
-import org.bukkit.DyeColor;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.LivingEntity;
@@ -47,6 +46,7 @@ import org.bukkit.scheduler.BukkitTask;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -57,7 +57,7 @@ import java.util.List;
  */
 public class GuardDogs extends JavaPlugin {
 
-    protected String guardFileName = "guards.yml";
+    protected String configFileName = "config.yml";
     protected HashSet<Wolf> guards = new HashSet<>();
     protected HashMap<Wolf, LivingEntity> guardTargets = new HashMap<>();
     protected HashMap<Wolf, Location> guardPositions = new HashMap<>();
@@ -65,6 +65,7 @@ public class GuardDogs extends JavaPlugin {
     protected HashMap<Wolf, HashSet<String>> guardIgnores = new HashMap<>();
     protected HashMap<Player, Wolf> settingIgnore = new HashMap<>();
     protected boolean targetDetermination = false;
+    protected Material createMat, disableMat, ignoreMat = null;
     private BukkitTask targetDeterminer;
     private BukkitTask guardTicker;
 
@@ -128,50 +129,59 @@ public class GuardDogs extends JavaPlugin {
     }
 
     public void saveGuards() {
-        File guardFile = new File(getDataFolder(), guardFileName);
-        if (guardFile.exists()) {
-            guardFile.delete();
+        File configFile = new File(getDataFolder(), configFileName);
+        if (configFile.exists()) {
+            configFile.delete();
         }
 
-        if (guards.isEmpty()) {
+        /* if (guards.isEmpty()) {
             return;
-        }
+        } */
 
         try {
             if (!Files.exists(getDataFolder().toPath())) {
                 Files.createDirectory(getDataFolder().toPath());
             }
-            guardFile.createNewFile();
+            configFile.createNewFile();
         } catch (IOException e) {
-            logMessage("Unable to create guard file!");
+            logMessage("Unable to create config file!");
             e.printStackTrace();
             return;
         }
 
-        FileConfiguration config = YamlConfiguration.loadConfiguration(guardFile);
+        FileConfiguration config = YamlConfiguration.loadConfiguration(configFile);
         List<String> guardIds = new ArrayList<>();
 
         for (Wolf wolf : guards) {
             String id = wolf.getUniqueId().toString();
             Location loc = guardPositions.get(wolf);
+            if (loc == null) {
+                throw new AssertionError("Attempting to save a guard dog whose position is null! Something went " +
+                        "terribly wrong here.");
+            }
             guardIds.add(id);
-            config.set(id + ".world", loc.getWorld().getName());
-            config.set(id + ".X", loc.getBlockX());
-            config.set(id + ".Y", loc.getBlockY());
-            config.set(id + ".Z", loc.getBlockZ());
+            config.set("guards." + id + ".world", loc.getWorld().getName());
+            config.set("guards." + id + ".X", loc.getBlockX());
+            config.set("guards." + id + ".Y", loc.getBlockY());
+            config.set("guards." + id + ".Z", loc.getBlockZ());
 
             if (guardIgnores.containsKey(wolf)) {
                 ArrayList<String> ignores = new ArrayList<>();
                 for (String s : guardIgnores.get(wolf)) {
                     ignores.add(s);
                 }
-                config.set(id + ".ignores", ignores);
+                config.set("guards." + id + ".ignores", ignores);
             }
         }
 
-        config.set("guards", guardIds);
+        config.set("id.create", createMat.toString());
+        config.set("id.disable", disableMat.toString());
+        config.set("id.ignore", ignoreMat.toString());
+
+        config.set("guards.guardids", guardIds);
+        config.set("version", getDescription().getVersion());
         try {
-            config.save(guardFile);
+            config.save(configFile);
         } catch (IOException e) {
             logMessage("Unable to save guard file!");
         }
@@ -179,43 +189,159 @@ public class GuardDogs extends JavaPlugin {
     }
 
     protected void loadGuards() {
-        File guardFile = new File(getDataFolder(), guardFileName);
-        if (!guardFile.exists()) {
-            logMessage("No guard file.");
-            return;
+        boolean newConfig = true;
+        File configFile = new File(getDataFolder(), configFileName);
+        if (!configFile.exists()) {
+            logMessage("No config file.");
+            createMat = Material.PUMPKIN_SEEDS;
+            disableMat = Material.STICK;
+            ignoreMat = Material.GOLD_NUGGET;
+            if (Files.exists(new File(getDataFolder(), "guards.yml").toPath())) {
+                logMessage("Found old guards.yml, renaming...");
+                try {
+                    Files.move(new File(getDataFolder(), "guards.yml").toPath(), new File(getDataFolder(),
+                            configFileName).toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    logMessage("Succeeded, proceeding to load old configuration scheme (will be converted on " +
+                            "next save)");
+                    newConfig = false;
+                } catch (IOException e) {
+                    logMessage("Unable to rename guards.yml to config.yml, proceeding with empty config.");
+                    e.printStackTrace();
+                }
+
+            } else {
+                return;
+            }
         }
 
-        FileConfiguration config = YamlConfiguration.loadConfiguration(guardFile);
-        List<String> guardIds = config.getStringList("guards");
+        FileConfiguration config = YamlConfiguration.loadConfiguration(configFile);
+
+        List<String> guardIds;
+        if (newConfig) {
+            guardIds = config.getStringList("guards.guardids");
+        } else {
+            guardIds = config.getStringList("guards");
+        }
+
+        if (newConfig) {
+            createMat = Material.getMaterial(config.getString("id.create"));
+            disableMat = Material.getMaterial(config.getString("id.disable"));
+            ignoreMat = Material.getMaterial(config.getString("id.ignore"));
+        }
 
         for (World world : getServer().getWorlds()) {
             for (LivingEntity entity : world.getLivingEntities()) {
                 if (entity instanceof Wolf) {
                     if (guardIds.contains(entity.getUniqueId().toString())) {
                         Wolf wolf = (Wolf) entity;
-                        createGuard(wolf);
-                        guardWaits.put(wolf, 40);
-                        String uuid = entity.getUniqueId().toString();
-                        World posWorld = getServer().getWorld((String) config.get(uuid + ".world"));
-                        int X = Integer.parseInt((String) config.get(uuid + ".X"));
-                        int Y = Integer.parseInt((String) config.get(uuid + ".Y"));
-                        int Z = Integer.parseInt((String) config.get(uuid + ".Z"));
-                        //Location pos = new Location(wolf.getWorld(), X, Y, Z);
+                        String uuid = wolf.getUniqueId().toString();
+
+                        World posWorld;
+                        int X, Y, Z;
+                        if (newConfig) {
+                            posWorld = getServer().getWorld(config.getString("guards." + uuid + ".world"));
+                            X = Integer.parseInt(config.getString("guards." + uuid + ".X"));
+                            Y = Integer.parseInt(config.getString("guards." + uuid + ".Y"));
+                            Z = Integer.parseInt(config.getString("guards." + uuid + ".Z"));
+                        } else {
+                            posWorld = getServer().getWorld((String) config.get(uuid + ".world"));
+                            X = Integer.parseInt((String) config.get(uuid + ".X"));
+                            Y = Integer.parseInt((String) config.get(uuid + ".Y"));
+                            Z = Integer.parseInt((String) config.get(uuid + ".Z"));
+                        }
                         Location pos = new Location(posWorld, X, Y, Z);
                         entity.teleport(pos);
                         guardPositions.put(wolf, pos);
-                        ((Wolf) entity).setSitting(true);
-                        if (config.contains(uuid + ".ignores")) {
-                            List<String> ignores = config.getStringList(uuid + ".ignores");
-                            HashSet<String> putIgnores = new HashSet<>();
-                            for (String s : ignores) {
-                                putIgnores.add(s);
+                        wolf.setSitting(true);
+                        createGuard(wolf);
+                        guardWaits.put(wolf, 40);
+
+                        if (newConfig) {
+                            if (config.contains("guards." + uuid + ".ignores")) {
+                                List<String> ignores = config.getStringList(uuid + ".ignores");
+                                HashSet<String> putIgnores = new HashSet<>();
+                                for (String s : ignores) {
+                                    putIgnores.add(s);
+                                }
+                                guardIgnores.put(wolf, putIgnores);
                             }
-                            guardIgnores.put(wolf, putIgnores);
+                        } else {
+                            if (config.contains(uuid + ".ignores")) {
+                                List<String> ignores = config.getStringList(uuid + ".ignores");
+                                HashSet<String> putIgnores = new HashSet<>();
+                                for (String s : ignores) {
+                                    putIgnores.add(s);
+                                }
+                                guardIgnores.put(wolf, putIgnores);
+                            }
                         }
+
                     }
                 }
             }
         }
+    }
+
+    public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
+        if (cmd.getName().equalsIgnoreCase("guarddogs")) {
+            if (sender instanceof Player) {
+                if (!sender.hasPermission("guarddogs.admin")) {
+                    sender.sendMessage(ChatColor.RED + "Sorry, but you don't have permission to edit guard dogs iems.");
+                    return true;
+                }
+            }
+
+            if (args.length == 0) {
+                sender.sendMessage(ChatColor.GREEN + "You are running " + ChatColor.DARK_GREEN + "Guard Dogs" +
+                        ChatColor.GREEN + " version " + ChatColor.AQUA + getDescription().getVersion());
+                return true;
+            }
+
+            if (args.length != 2) {
+                sender.sendMessage(ChatColor.RED + "Usage: /guarddogs [create|disable|ignore] [Material]" +
+                        ChatColor.GRAY + " - " + ChatColor.GREEN + "Changes the item you need to right click a wolf " +
+                        "with in order to perform the specified action.");
+                return true;
+            }
+
+            if (args[0].equalsIgnoreCase("create")) {
+                Material tmp = Material.getMaterial(args[1]);
+                if (tmp != null) {
+                    createMat = tmp;
+                    sender.sendMessage(ChatColor.GREEN + "Material changed. From now on, right click a tamed wolf " +
+                            "with " + ChatColor.AQUA + args[1] + ChatColor.GREEN + " to make it a guard dog.");
+                } else {
+                    sender.sendMessage(ChatColor.RED + args[1] + " is not a valid material!");
+                }
+                return true;
+            } else if (args[0].equalsIgnoreCase("disable")) {
+                Material tmp = Material.getMaterial(args[1]);
+                if (tmp != null) {
+                    disableMat = tmp;
+                    sender.sendMessage(ChatColor.GREEN + "Material changed. From now on, right click a guard dog " +
+                            "with " + ChatColor.AQUA + args[1] + ChatColor.GREEN + " to disable it.");
+                } else {
+                    sender.sendMessage(ChatColor.RED + args[1] + " is not a valid material!");
+                }
+                return true;
+            } else if (args[0].equalsIgnoreCase("ignore")) {
+                Material tmp = Material.getMaterial(args[1]);
+                if (tmp != null) {
+                    ignoreMat = tmp;
+                    sender.sendMessage(ChatColor.GREEN + "Material changed. From now on, right click a guard dog " +
+                            "with " + ChatColor.AQUA + args[1] + ChatColor.GREEN + " to make it ignore a player.");
+                } else {
+                    sender.sendMessage(ChatColor.RED + args[1] + " is not a valid material!");
+                }
+                return true;
+            } else {
+                sender.sendMessage(ChatColor.RED + "Usage: /guarddogs [create|disable|ignore] [Material]" +
+                        ChatColor.GRAY + " - " + ChatColor.GREEN + "Changes the item you need to right click a wolf " +
+                        "with in order to perform the specified action.");
+                return true;
+            }
+        }
+
+        return false;
     }
 }

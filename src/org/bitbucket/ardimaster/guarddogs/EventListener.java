@@ -31,7 +31,6 @@
 package org.bitbucket.ardimaster.guarddogs;
 
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -65,7 +64,7 @@ public class EventListener implements Listener {
         Wolf wolf = (Wolf) event.getRightClicked();
         Player player = event.getPlayer();
 
-        if (player.getItemInHand().getType().equals(Material.PUMPKIN_SEEDS)) {
+        if (player.getItemInHand().getType().equals(plugin.createMat)) {
             if (!wolf.isTamed()) {
                 player.sendMessage(ChatColor.RED + "You can't make this dog your guard dog as it isn't tamed!");
                 return;
@@ -78,7 +77,7 @@ public class EventListener implements Listener {
 
             plugin.guardPositions.put(wolf, wolf.getLocation());
             if (plugin.createGuard(wolf)) {
-                player.getInventory().removeItem(new ItemStack(Material.PUMPKIN_SEEDS, 1));
+                player.getInventory().removeItem(new ItemStack(plugin.createMat, 1));
                 player.sendMessage(ChatColor.DARK_GREEN + "Guard dog" + ChatColor.GREEN + " ready for action");
                 plugin.guardWaits.put(wolf, 40);
                 wolf.setSitting(true);
@@ -86,7 +85,7 @@ public class EventListener implements Listener {
                 player.sendMessage(ChatColor.RED + "This is already your guard dog!");
             }
 
-        } else if (player.getItemInHand().getType().equals(Material.STICK)) {
+        } else if (player.getItemInHand().getType().equals(plugin.disableMat)) {
             if (!wolf.isTamed() || !wolf.getOwner().equals(player)) {
                 player.sendMessage(ChatColor.RED + "This isn't your dog. Thus, it can't be your guard dog. " +
                         "Thus, you can't disable it.");
@@ -99,7 +98,7 @@ public class EventListener implements Listener {
             } else {
                 player.sendMessage(ChatColor.RED + "This isn't a guard dog, it's just a normal dog!");
             }
-        } else if (player.getItemInHand().getType().equals(Material.GOLD_NUGGET)) {
+        } else if (player.getItemInHand().getType().equals(plugin.ignoreMat)) {
             if (!wolf.isTamed() || !wolf.getOwner().equals(player)) {
                 player.sendMessage(ChatColor.RED + "This isn't your dog. Thus, it can't be your guard dog. " +
                         "Thus, you can't set it's ignores.");
@@ -141,7 +140,7 @@ public class EventListener implements Listener {
     }
 
     @EventHandler
-    public void onEntityDeath(EntityDeathEvent event){
+    public void onEntityDeath(EntityDeathEvent event) {
         if (event.getEntity() instanceof Wolf) {
             Wolf wolf = (Wolf) event.getEntity();
             plugin.deadGuard(wolf);
@@ -151,6 +150,9 @@ public class EventListener implements Listener {
         LivingEntity deadEntity = event.getEntity();
         if (plugin.guardTargets.containsValue(deadEntity)) {
             for (Wolf wolf : plugin.guards) {
+                if (!plugin.guardTargets.containsKey(wolf)) {
+                    continue;
+                }
                 if (plugin.guardTargets.get(wolf).equals(deadEntity)) {
                     plugin.guardWaits.put(wolf, 5 * 20);
                     wolf.setSitting(true);

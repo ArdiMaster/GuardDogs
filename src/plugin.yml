@@ -1,4 +1,13 @@
 name: GuardDogs
-version: 0.5.6
+version: 0.6
 main: org.bitbucket.ardimaster.guarddogs.GuardDogs
 author: ArdiMaster
+
+commands:
+  guarddogs:
+    usage: /guarddogs [create|disable|ignore] [Material]
+
+permissions:
+  guarddogs.admin:
+    description: Allows you to modify the items required for guard dogs.
+    default: op
