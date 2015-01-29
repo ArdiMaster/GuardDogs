@@ -64,6 +64,9 @@ public class EventListener implements Listener {
         Wolf wolf = (Wolf) event.getRightClicked();
         Player player = event.getPlayer();
 
+        plugin.logMessage("[DEBUG] " + player.getName() + " right-clicked a wolf with " +
+                player.getItemInHand().getType().toString());
+
         if (player.getItemInHand().getType().equals(plugin.createMat)) {
             if (!wolf.isTamed()) {
                 player.sendMessage(ChatColor.RED + "You can't make this dog your guard dog as it isn't tamed!");
@@ -98,7 +101,7 @@ public class EventListener implements Listener {
             } else {
                 player.sendMessage(ChatColor.RED + "This isn't a guard dog, it's just a normal dog!");
             }
-        } else if (player.getItemInHand().getType().equals(plugin.disableMat)) {
+        } else if (player.getItemInHand().getType().equals(plugin.ignoreMat)) {
             if (!wolf.isTamed() || !wolf.getOwner().equals(player)) {
                 player.sendMessage(ChatColor.RED + "This isn't your dog. Thus, it can't be your guard dog. " +
                         "Thus, you can't set it's ignores.");
