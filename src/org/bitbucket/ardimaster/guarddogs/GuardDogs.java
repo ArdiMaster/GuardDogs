@@ -134,9 +134,9 @@ public class GuardDogs extends JavaPlugin {
             configFile.delete();
         }
 
-        if (guards.isEmpty()) {
+        /* if (guards.isEmpty()) {
             return;
-        }
+        } */
 
         try {
             if (!Files.exists(getDataFolder().toPath())) {
@@ -169,6 +169,10 @@ public class GuardDogs extends JavaPlugin {
                 config.set("guards." + id + ".ignores", ignores);
             }
         }
+
+        config.set("id.create", createMat.toString());
+        config.set("id.disable", disableMat.toString());
+        config.set("id.ignore", ignoreMat.toString());
 
         config.set("guards.guardids", guardIds);
         config.set("version", getDescription().getVersion());
@@ -293,6 +297,7 @@ public class GuardDogs extends JavaPlugin {
                 sender.sendMessage(ChatColor.RED + "Usage: /guarddogs [create|disable|ignore] [Material]" +
                         ChatColor.GRAY + " - " + ChatColor.GREEN + "Changes the item you need to right click a wolf " +
                         "with in order to perform the specified action.");
+                return true;
             }
 
             if (args[0].equalsIgnoreCase("create")) {
