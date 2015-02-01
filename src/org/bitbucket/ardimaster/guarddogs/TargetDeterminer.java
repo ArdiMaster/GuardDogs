@@ -38,7 +38,9 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Created by ArdiMaster on 21.01.15.
+ * This class contains the repeating Bukkit task to determine targets for the guard dogs.
+ *
+ * @author ArdiMaster
  */
 public class TargetDeterminer extends BukkitRunnable {
     private GuardDogs plugin;

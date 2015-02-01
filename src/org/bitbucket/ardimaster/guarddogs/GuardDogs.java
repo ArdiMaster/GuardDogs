@@ -53,22 +53,38 @@ import java.util.HashSet;
 import java.util.List;
 
 /**
- * Created by ArdiMaster on 19.01.15.
+ * GuardDogs main class
+ *
+ * @author ArdiMaster
  */
 public class GuardDogs extends JavaPlugin {
 
+    /**
+     * The name of the configuration file
+     */
     protected String configFileName = "config.yml";
+    /** This HashSet holds all the guard dogs */
     protected HashSet<Wolf> guards = new HashSet<>();
+    /** This HashMap contains the allocation of guard dogs --> targets */
     protected HashMap<Wolf, LivingEntity> guardTargets = new HashMap<>();
+    /** This HashMap contains the allocation of guard dogs --> location */
     protected HashMap<Wolf, Location> guardPositions = new HashMap<>();
+    /** This HashMap contains the allocation of guard dogs --> their wait countdown */
     protected HashMap<Wolf, Integer> guardWaits = new HashMap<>();
+    /** This HashMap contains the allocation of guard dogs --> their ignored players */
     protected HashMap<Wolf, HashSet<String>> guardIgnores = new HashMap<>();
+    /** This HashMap contains the allocation of players --> the guard dogs whose ignores players are currently set */
     protected HashMap<Player, Wolf> settingIgnore = new HashMap<>();
+    /** This boolean is true when guard dog targets are currently determined  */
     protected boolean targetDetermination = false;
+    /** The materials required to create / disable a guard dog or to set his ignores */
     protected Material createMat, disableMat, ignoreMat = null;
+    /** The repeating Bukkit task for guard dogs target determination */
     private BukkitTask targetDeterminer;
+    /** The repeating Bukkit task for guard dogs countdowns */
     private BukkitTask guardTicker;
 
+    /** Method ran when plugin gets enabled by server  */
     @Override
     public void onEnable() {
         loadGuards();
@@ -77,6 +93,7 @@ public class GuardDogs extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new EventListener(this), this);
     }
 
+    /** Method ran when plugin gets disabled by server */
     @Override
     public void onDisable() {
         targetDeterminer.cancel();
@@ -84,10 +101,21 @@ public class GuardDogs extends JavaPlugin {
         saveGuards();
     }
 
+    /**
+     * Method invoked to print informational log messages
+     *
+     * @param message The message to print
+     */
     public void logMessage(String message) {
         getLogger().info("[" + getDescription().getName() + " " + getDescription().getVersion() + "] " + message);
     }
 
+    /**
+     * This method handles the creation of guard dogs
+     *
+     * @param wolf The wolf supposed to become a guard dog
+     * @return Returns false if the given wolf already is a guard dog, returns true otherwise.
+     */
     public boolean createGuard(Wolf wolf) {
         if (guards.contains(wolf)) {
             return false;
@@ -100,6 +128,11 @@ public class GuardDogs extends JavaPlugin {
         return true;
     }
 
+    /**
+     * Method invoked when a wolf dies
+     *
+     * @param wolf The wolf which died
+     */
     public void deadGuard(Wolf wolf) {
         if (!guards.contains(wolf)) {
             return;
@@ -117,6 +150,13 @@ public class GuardDogs extends JavaPlugin {
         }
     }
 
+    /**
+     * Method invoked when a guard dog is requested to be removed / disabled
+     *
+     * @param wolf The wolf requested to be removed
+     * @param player Currently unused, will be removed soon.
+     * @return Whether the requested wolf was a guard dog. (true if he was)
+     */
     public boolean removeGuard(Wolf wolf, Player player) {
         if (!guards.contains(wolf)) {
             return false;
@@ -128,6 +168,7 @@ public class GuardDogs extends JavaPlugin {
         return true;
     }
 
+    /** Method invoked to save all configuration and guard dogs to disk */
     public void saveGuards() {
         File configFile = new File(getDataFolder(), configFileName);
         if (configFile.exists()) {
@@ -188,6 +229,7 @@ public class GuardDogs extends JavaPlugin {
 
     }
 
+    /** Method invoked to load all config and guard dogs from disk */
     protected void loadGuards() {
         boolean newConfig = true;
         File configFile = new File(getDataFolder(), configFileName);
@@ -282,6 +324,7 @@ public class GuardDogs extends JavaPlugin {
         }
     }
 
+    /** Method invoked by server when a command is ran */
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
         if (cmd.getName().equalsIgnoreCase("guarddogs")) {
             if (sender instanceof Player) {

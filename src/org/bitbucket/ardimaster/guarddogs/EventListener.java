@@ -46,15 +46,23 @@ import org.bukkit.inventory.ItemStack;
 import java.util.HashSet;
 
 /**
- * Created by ArdiMaster on 19.01.15.
+ * The Bukkit event listening class for the GuardDogs plugin
  */
 public class EventListener implements Listener {
+    /**
+     *
+     */
     protected GuardDogs plugin;
 
     public EventListener(GuardDogs plugin) {
         this.plugin = plugin;
     }
 
+    /**
+     * Invoked by the server when a player right-clicks an entity
+     *
+     * @param event The triggered event
+     */
     @EventHandler
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
         if (!(event.getRightClicked() instanceof Wolf)) {
@@ -123,6 +131,11 @@ public class EventListener implements Listener {
 
     }
 
+    /**
+     * Invoked by the server ven an entity gets damaged by entity
+     *
+     * @param event The event
+     */
     @EventHandler
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
         if (plugin.targetDetermination) {
@@ -139,6 +152,11 @@ public class EventListener implements Listener {
         }
     }
 
+    /**
+     * Invoked when an entity dies
+     *
+     * @param event The event
+     */
     @EventHandler
     public void onEntityDeath(EntityDeathEvent event) {
         if (event.getEntity() instanceof Wolf) {
@@ -163,6 +181,11 @@ public class EventListener implements Listener {
         }
     }
 
+    /**
+     * Invoked when a player chats
+     *
+     * @param event The event
+     */
     @EventHandler
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         if (!plugin.settingIgnore.containsKey(event.getPlayer())) {
