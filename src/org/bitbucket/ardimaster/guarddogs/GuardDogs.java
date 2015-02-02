@@ -83,6 +83,10 @@ public class GuardDogs extends JavaPlugin {
     private BukkitTask targetDeterminer;
     /** The repeating Bukkit task for guard dogs countdowns */
     private BukkitTask guardTicker;
+    /**
+     * The Plugin Metrics / MCStats instance
+     */
+    private Metrics metrics;
 
     /** Method ran when plugin gets enabled by server  */
     @Override
@@ -91,6 +95,13 @@ public class GuardDogs extends JavaPlugin {
         targetDeterminer = new TargetDeterminer(this).runTaskTimer(this, 30 * 20, 10);
         guardTicker = new GuardTicker(this).runTaskTimer(this, 15 * 20, 10);
         getServer().getPluginManager().registerEvents(new EventListener(this), this);
+        try {
+            metrics = new Metrics(this);
+        } catch (IOException e) {
+            logMessage("Could not start metrics! Is outbound communication blocked, or is the server offline?");
+            e.printStackTrace();
+        }
+        metrics.start();
     }
 
     /** Method ran when plugin gets disabled by server */
