@@ -94,7 +94,7 @@ public class TargetDeterminer extends BukkitRunnable {
                             nearPlayers.add((Player) e);
                         } else {
                             if (!(e instanceof Sheep) && !(e instanceof Chicken) && !(e instanceof Cow) &&
-                                    !(e instanceof Pig) && !(e instanceof Horse)) {
+                                    !(e instanceof Pig) && !(e instanceof Horse) && !(e instanceof Creeper)) {
                                 near.add(e);
                             }
                         }
