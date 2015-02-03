@@ -45,12 +45,10 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 /**
  * GuardDogs main class
@@ -79,13 +77,15 @@ public class GuardDogs extends JavaPlugin {
     protected boolean targetDetermination = false;
     /** The materials required to create / disable a guard dog or to set his ignores */
     protected Material createMat, disableMat, ignoreMat = null;
+    /**
+     * The ,ost recent version available for download, as determined in onEnable
+     */
+    protected String currentVersion;
     /** The repeating Bukkit task for guard dogs target determination */
     private BukkitTask targetDeterminer;
     /** The repeating Bukkit task for guard dogs countdowns */
     private BukkitTask guardTicker;
-    /**
-     * The Plugin Metrics / MCStats instance
-     */
+    /** The Plugin Metrics / MCStats instance */
     private Metrics metrics;
 
     /** Method ran when plugin gets enabled by server  */
@@ -97,11 +97,35 @@ public class GuardDogs extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new EventListener(this), this);
         try {
             metrics = new Metrics(this);
+            metrics.start();
         } catch (IOException e) {
             logMessage("Could not start metrics! Is outbound communication blocked, or is the server offline?");
             e.printStackTrace();
         }
-        metrics.start();
+
+        getServer().getScheduler().runTaskAsynchronously(this, new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    URL url = new URL("http://files.diepixelecke.tk/GuardDogs/currentVersion.txt");
+                    Scanner s = new Scanner(url.openStream());
+                    currentVersion = s.nextLine();
+                    s.close();
+                    if (currentVersion.equals(getDescription().getVersion())) {
+                        logMessage("Plugin up-to-date.");
+                    } else {
+                        logMessage("An update was found! The newest version is " + currentVersion +
+                                ", you are still running " + getDescription().getVersion() + "! Grab it at " +
+                                "http://dev.bukkit.org/bukkit-plugins/guard-dogs");
+                    }
+                } catch (IOException e) {
+                    logMessage("Could not check for updates! Please check manually at " +
+                            "http://dev.bukkit.org/bukkit-plugins/guard-dogs");
+                    e.printStackTrace();
+                    currentVersion = getDescription().getVersion();
+                }
+            }
+        });
     }
 
     /** Method ran when plugin gets disabled by server */
