@@ -34,7 +34,10 @@ import org.bukkit.entity.Wolf;
 import org.bukkit.scheduler.BukkitRunnable;
 
 /**
- * Created by adrianwelcker on 23.01.15.
+ * Class containing the repeating Bukkit task to reseat guard dogs which are standing without a target, also contains
+ * the timer for GuardDogs.guardWaits
+ *
+ * @author ArdiMaster
  */
 public class GuardTicker extends BukkitRunnable {
     private GuardDogs plugin;

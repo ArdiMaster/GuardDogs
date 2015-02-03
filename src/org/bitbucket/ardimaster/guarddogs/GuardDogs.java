@@ -45,38 +45,96 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
+import java.util.logging.Level;
 
 /**
- * Created by ArdiMaster on 19.01.15.
+ * GuardDogs main class
+ *
+ * @author ArdiMaster
  */
 public class GuardDogs extends JavaPlugin {
 
+    /**
+     * The name of the configuration file
+     */
     protected String configFileName = "config.yml";
+    /** This HashSet holds all the guard dogs */
     protected HashSet<Wolf> guards = new HashSet<>();
+    /** This HashMap contains the allocation of guard dogs --> targets */
     protected HashMap<Wolf, LivingEntity> guardTargets = new HashMap<>();
+    /** This HashMap contains the allocation of guard dogs --> location */
     protected HashMap<Wolf, Location> guardPositions = new HashMap<>();
+    /** This HashMap contains the allocation of guard dogs --> their wait countdown */
     protected HashMap<Wolf, Integer> guardWaits = new HashMap<>();
+    /** This HashMap contains the allocation of guard dogs --> their ignored players */
     protected HashMap<Wolf, HashSet<String>> guardIgnores = new HashMap<>();
+    /** This HashMap contains the allocation of players --> the guard dogs whose ignores players are currently set */
     protected HashMap<Player, Wolf> settingIgnore = new HashMap<>();
+    /** This boolean is true when guard dog targets are currently determined  */
     protected boolean targetDetermination = false;
+    /** The materials required to create / disable a guard dog or to set his ignores */
     protected Material createMat, disableMat, ignoreMat = null;
+    /**
+     * The most recent version available for download, as determined in onEnable
+     */
+    protected String currentVersion = "ERROR";
+    /** The repeating Bukkit task for guard dogs target determination */
     private BukkitTask targetDeterminer;
+    /** The repeating Bukkit task for guard dogs countdowns */
     private BukkitTask guardTicker;
+    /** The Plugin Metrics / MCStats instance */
+    private Metrics metrics;
 
+    /** Method ran when plugin gets enabled by server  */
     @Override
     public void onEnable() {
         loadGuards();
         targetDeterminer = new TargetDeterminer(this).runTaskTimer(this, 30 * 20, 10);
         guardTicker = new GuardTicker(this).runTaskTimer(this, 15 * 20, 10);
         getServer().getPluginManager().registerEvents(new EventListener(this), this);
+        try {
+            metrics = new Metrics(this);
+            metrics.start();
+        } catch (IOException e) {
+            log(Level.WARNING, "Could not start metrics! Is outbound communication blocked, or is the server offline?");
+            e.printStackTrace();
+        }
+
+        getServer().getScheduler().runTaskAsynchronously(this, new Runnable() {
+            /**
+             * Async method invoked by server on plugin initialization in order to determine
+             * the most recent available version of the plugin
+             */
+            @Override
+            public void run() {
+                try {
+                    URL url = new URL("http://files.diepixelecke.tk/GuardDogs/currentVersion.txt");
+                    Scanner s = new Scanner(url.openStream());
+                    currentVersion = s.nextLine();
+                    s.close();
+                    if (currentVersion.equals(getDescription().getVersion())) {
+                        log(Level.INFO, "Plugin up-to-date.");
+                    } else {
+                        log(Level.WARNING, "An update was found! The newest version is " + currentVersion +
+                                ", you are still running " + getDescription().getVersion() + "! Grab it at " +
+                                "http://dev.bukkit.org/bukkit-plugins/guard-dogs");
+                    }
+                } catch (IOException e) {
+                    log(Level.WARNING, "Could not check for updates! Please check manually at " +
+                            "http://dev.bukkit.org/bukkit-plugins/guard-dogs");
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        log(Level.INFO, "Plugin loaded and available!");
     }
 
+    /** Method ran when plugin gets disabled by server */
     @Override
     public void onDisable() {
         targetDeterminer.cancel();
@@ -84,29 +142,63 @@ public class GuardDogs extends JavaPlugin {
         saveGuards();
     }
 
-    public void logMessage(String message) {
-        getLogger().info("[" + getDescription().getName() + " " + getDescription().getVersion() + "] " + message);
+    /**
+     * Method invoked to print informational log messages
+     *
+     * @param message The message to print
+     */
+    public void log(Level level, String message) {
+        getLogger().log(level, message);
     }
 
+    /**
+     * This method handles the creation of guard dogs
+     *
+     * @param wolf The wolf supposed to become a guard dog
+     * @return Returns false if the given wolf already is a guard dog, returns true otherwise.
+     */
     public boolean createGuard(Wolf wolf) {
         if (guards.contains(wolf)) {
             return false;
         }
+
         guards.add(wolf);
+        guardPositions.put(wolf, wolf.getLocation());
+        guardWaits.put(wolf, 40);
+        wolf.setSitting(true);
         wolf.setCollarColor(DyeColor.LIME);
         wolf.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 300, 1));
-        logMessage("A new guard dog has been created: " + wolf.getUniqueId().toString());
+        log(Level.INFO, "A new guard dog has been created: " + wolf.getUniqueId().toString());
         saveGuards();
         return true;
     }
 
+    /**
+     * Method invoked when a wolf dies
+     *
+     * @param wolf The wolf which died
+     */
     public void deadGuard(Wolf wolf) {
         if (!guards.contains(wolf)) {
             return;
         }
 
         guards.remove(wolf);
-        logMessage("A guard dog has died: " + wolf.getUniqueId().toString());
+        guardPositions.remove(wolf);
+
+        if (guardTargets.containsKey(wolf)) {
+            guardTargets.remove(wolf);
+        }
+
+        if (guardIgnores.containsKey(wolf)) {
+            guardIgnores.remove(wolf);
+        }
+
+        if (guardWaits.containsKey(wolf)) {
+            guardWaits.remove(wolf);
+        }
+
+        log(Level.INFO, "A guard dog has died: " + wolf.getUniqueId().toString());
         saveGuards();
         if (wolf.getOwner() instanceof Player) {
             Player player = (Player) wolf.getOwner();
@@ -117,26 +209,44 @@ public class GuardDogs extends JavaPlugin {
         }
     }
 
+    /**
+     * Method invoked when a guard dog is requested to be removed / disabled
+     *
+     * @param wolf The wolf requested to be removed
+     * @param player Currently unused, will be removed soon.
+     * @return Whether the requested wolf was a guard dog. (true if he was)
+     */
     public boolean removeGuard(Wolf wolf, Player player) {
         if (!guards.contains(wolf)) {
             return false;
         }
 
         guards.remove(wolf);
-        logMessage("A guard dog has been removed: " + wolf.getUniqueId().toString());
+        guardPositions.remove(wolf);
+
+        if (guardTargets.containsKey(wolf)) {
+            guardTargets.remove(wolf);
+        }
+
+        if (guardIgnores.containsKey(wolf)) {
+            guardIgnores.remove(wolf);
+        }
+
+        if (guardWaits.containsKey(wolf)) {
+            guardWaits.remove(wolf);
+        }
+
+        log(Level.INFO, "A guard dog has been removed: " + wolf.getUniqueId().toString());
         saveGuards();
         return true;
     }
 
+    /** Method invoked to save all configuration and guard dogs to disk */
     public void saveGuards() {
         File configFile = new File(getDataFolder(), configFileName);
         if (configFile.exists()) {
             configFile.delete();
         }
-
-        /* if (guards.isEmpty()) {
-            return;
-        } */
 
         try {
             if (!Files.exists(getDataFolder().toPath())) {
@@ -144,7 +254,7 @@ public class GuardDogs extends JavaPlugin {
             }
             configFile.createNewFile();
         } catch (IOException e) {
-            logMessage("Unable to create config file!");
+            log(Level.WARNING, "Unable to create config file!");
             e.printStackTrace();
             return;
         }
@@ -156,6 +266,7 @@ public class GuardDogs extends JavaPlugin {
             String id = wolf.getUniqueId().toString();
             Location loc = guardPositions.get(wolf);
             if (loc == null) {
+                log(Level.SEVERE, "Something is bad");
                 throw new AssertionError("Attempting to save a guard dog whose position is null! Something went " +
                         "terribly wrong here.");
             }
@@ -183,29 +294,30 @@ public class GuardDogs extends JavaPlugin {
         try {
             config.save(configFile);
         } catch (IOException e) {
-            logMessage("Unable to save guard file!");
+            log(Level.WARNING, "Unable to save guard file!");
         }
 
     }
 
+    /** Method invoked to load all config and guard dogs from disk */
     protected void loadGuards() {
         boolean newConfig = true;
         File configFile = new File(getDataFolder(), configFileName);
         if (!configFile.exists()) {
-            logMessage("No config file.");
+            log(Level.INFO, "No config file.");
             createMat = Material.PUMPKIN_SEEDS;
             disableMat = Material.STICK;
             ignoreMat = Material.GOLD_NUGGET;
             if (Files.exists(new File(getDataFolder(), "guards.yml").toPath())) {
-                logMessage("Found old guards.yml, renaming...");
+                log(Level.INFO, "Found old guards.yml, renaming...");
                 try {
                     Files.move(new File(getDataFolder(), "guards.yml").toPath(), new File(getDataFolder(),
                             configFileName).toPath(), StandardCopyOption.REPLACE_EXISTING);
-                    logMessage("Succeeded, proceeding to load old configuration scheme (will be converted on " +
+                    log(Level.INFO, "Succeeded, proceeding to load old configuration scheme (will be converted on " +
                             "next save)");
                     newConfig = false;
                 } catch (IOException e) {
-                    logMessage("Unable to rename guards.yml to config.yml, proceeding with empty config.");
+                    log(Level.WARNING, "Unable to rename guards.yml to config.yml, proceeding with empty config.");
                     e.printStackTrace();
                 }
 
@@ -280,8 +392,10 @@ public class GuardDogs extends JavaPlugin {
                 }
             }
         }
+        log(Level.INFO, "Loading of config completed.");
     }
 
+    /** Method invoked by server when a command is ran */
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
         if (cmd.getName().equalsIgnoreCase("guarddogs")) {
             if (sender instanceof Player) {

@@ -41,12 +41,13 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashSet;
 
 /**
- * Created by ArdiMaster on 19.01.15.
+ * The Bukkit event listening class for the GuardDogs plugin
  */
 public class EventListener implements Listener {
     protected GuardDogs plugin;
@@ -55,6 +56,11 @@ public class EventListener implements Listener {
         this.plugin = plugin;
     }
 
+    /**
+     * Invoked by the server when a player right-clicks an entity
+     *
+     * @param event The triggered event
+     */
     @EventHandler
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
         if (!(event.getRightClicked() instanceof Wolf)) {
@@ -75,12 +81,9 @@ public class EventListener implements Listener {
                 return;
             }
 
-            plugin.guardPositions.put(wolf, wolf.getLocation());
             if (plugin.createGuard(wolf)) {
                 player.getInventory().removeItem(new ItemStack(plugin.createMat, 1));
                 player.sendMessage(ChatColor.DARK_GREEN + "Guard dog" + ChatColor.GREEN + " ready for action");
-                plugin.guardWaits.put(wolf, 40);
-                wolf.setSitting(true);
             } else {
                 player.sendMessage(ChatColor.RED + "This is already your guard dog!");
             }
@@ -93,7 +96,6 @@ public class EventListener implements Listener {
             }
 
             if (plugin.removeGuard(wolf, player)) {
-                plugin.guardPositions.remove(wolf);
                 player.sendMessage(ChatColor.DARK_GREEN + "Guard dog " + ChatColor.AQUA + "disabled.");
             } else {
                 player.sendMessage(ChatColor.RED + "This isn't a guard dog, it's just a normal dog!");
@@ -123,6 +125,11 @@ public class EventListener implements Listener {
 
     }
 
+    /**
+     * Invoked by the server ven an entity gets damaged by entity
+     *
+     * @param event The event
+     */
     @EventHandler
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
         if (plugin.targetDetermination) {
@@ -139,6 +146,11 @@ public class EventListener implements Listener {
         }
     }
 
+    /**
+     * Invoked when an entity dies
+     *
+     * @param event The event
+     */
     @EventHandler
     public void onEntityDeath(EntityDeathEvent event) {
         if (event.getEntity() instanceof Wolf) {
@@ -163,6 +175,11 @@ public class EventListener implements Listener {
         }
     }
 
+    /**
+     * Invoked when a player chats
+     *
+     * @param event The event
+     */
     @EventHandler
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         if (!plugin.settingIgnore.containsKey(event.getPlayer())) {
@@ -195,5 +212,25 @@ public class EventListener implements Listener {
         }
         event.setCancelled(true);
         player.sendMessage(ChatColor.DARK_GREEN + event.getMessage() + ChatColor.GREEN + " successfully added.");
+    }
+
+    /**
+     * Invoked when a player joins the game.
+     *
+     * @param event The event
+     */
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        if (plugin.currentVersion.equals("ERROR")) {
+            return;
+        }
+
+        if (!event.getPlayer().hasPermission("guarddogs.admin")) {
+            return;
+        }
+
+        event.getPlayer().sendMessage(ChatColor.AQUA + "Version " + ChatColor.GREEN + plugin.currentVersion + " of plugin " +
+                ChatColor.DARK_GREEN + "Guard Dogs" + ChatColor.AQUA + " is available! " + ChatColor.DARK_AQUA +
+                "Grab it at http://dev.bukkit.org/bukkit-plugins/guard-dogs");
     }
 }
