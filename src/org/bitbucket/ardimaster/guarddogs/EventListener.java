@@ -50,9 +50,6 @@ import java.util.HashSet;
  * The Bukkit event listening class for the GuardDogs plugin
  */
 public class EventListener implements Listener {
-    /**
-     *
-     */
     protected GuardDogs plugin;
 
     public EventListener(GuardDogs plugin) {
@@ -84,12 +81,9 @@ public class EventListener implements Listener {
                 return;
             }
 
-            plugin.guardPositions.put(wolf, wolf.getLocation());
             if (plugin.createGuard(wolf)) {
                 player.getInventory().removeItem(new ItemStack(plugin.createMat, 1));
                 player.sendMessage(ChatColor.DARK_GREEN + "Guard dog" + ChatColor.GREEN + " ready for action");
-                plugin.guardWaits.put(wolf, 40);
-                wolf.setSitting(true);
             } else {
                 player.sendMessage(ChatColor.RED + "This is already your guard dog!");
             }
@@ -102,7 +96,6 @@ public class EventListener implements Listener {
             }
 
             if (plugin.removeGuard(wolf, player)) {
-                plugin.guardPositions.remove(wolf);
                 player.sendMessage(ChatColor.DARK_GREEN + "Guard dog " + ChatColor.AQUA + "disabled.");
             } else {
                 player.sendMessage(ChatColor.RED + "This isn't a guard dog, it's just a normal dog!");
@@ -221,6 +214,11 @@ public class EventListener implements Listener {
         player.sendMessage(ChatColor.DARK_GREEN + event.getMessage() + ChatColor.GREEN + " successfully added.");
     }
 
+    /**
+     * Invoked when a player joins the game.
+     *
+     * @param event The event
+     */
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         if (plugin.currentVersion.equals("ERROR")) {

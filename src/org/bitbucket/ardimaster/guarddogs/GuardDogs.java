@@ -104,6 +104,10 @@ public class GuardDogs extends JavaPlugin {
         }
 
         getServer().getScheduler().runTaskAsynchronously(this, new Runnable() {
+            /**
+             * Async method invoked by server on plugin initialization in order to determine
+             * the most recent available version of the plugin
+             */
             @Override
             public void run() {
                 try {
@@ -154,7 +158,11 @@ public class GuardDogs extends JavaPlugin {
         if (guards.contains(wolf)) {
             return false;
         }
+
         guards.add(wolf);
+        guardPositions.put(wolf, wolf.getLocation());
+        guardWaits.put(wolf, 40);
+        wolf.setSitting(true);
         wolf.setCollarColor(DyeColor.LIME);
         wolf.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 300, 1));
         logMessage("A new guard dog has been created: " + wolf.getUniqueId().toString());
@@ -173,6 +181,20 @@ public class GuardDogs extends JavaPlugin {
         }
 
         guards.remove(wolf);
+        guardPositions.remove(wolf);
+
+        if (guardTargets.containsKey(wolf)) {
+            guardTargets.remove(wolf);
+        }
+
+        if (guardIgnores.containsKey(wolf)) {
+            guardIgnores.remove(wolf);
+        }
+
+        if (guardWaits.containsKey(wolf)) {
+            guardWaits.remove(wolf);
+        }
+
         logMessage("A guard dog has died: " + wolf.getUniqueId().toString());
         saveGuards();
         if (wolf.getOwner() instanceof Player) {
@@ -197,6 +219,20 @@ public class GuardDogs extends JavaPlugin {
         }
 
         guards.remove(wolf);
+        guardPositions.remove(wolf);
+
+        if (guardTargets.containsKey(wolf)) {
+            guardTargets.remove(wolf);
+        }
+
+        if (guardIgnores.containsKey(wolf)) {
+            guardIgnores.remove(wolf);
+        }
+
+        if (guardWaits.containsKey(wolf)) {
+            guardWaits.remove(wolf);
+        }
+
         logMessage("A guard dog has been removed: " + wolf.getUniqueId().toString());
         saveGuards();
         return true;
