@@ -210,10 +210,6 @@ public class GuardDogs extends JavaPlugin {
             configFile.delete();
         }
 
-        /* if (guards.isEmpty()) {
-            return;
-        } */
-
         try {
             if (!Files.exists(getDataFolder().toPath())) {
                 Files.createDirectory(getDataFolder().toPath());
