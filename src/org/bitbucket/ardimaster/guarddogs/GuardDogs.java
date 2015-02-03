@@ -78,9 +78,9 @@ public class GuardDogs extends JavaPlugin {
     /** The materials required to create / disable a guard dog or to set his ignores */
     protected Material createMat, disableMat, ignoreMat = null;
     /**
-     * The ,ost recent version available for download, as determined in onEnable
+     * The most recent version available for download, as determined in onEnable
      */
-    protected String currentVersion;
+    protected String currentVersion = "ERROR";
     /** The repeating Bukkit task for guard dogs target determination */
     private BukkitTask targetDeterminer;
     /** The repeating Bukkit task for guard dogs countdowns */
@@ -122,7 +122,6 @@ public class GuardDogs extends JavaPlugin {
                     logMessage("Could not check for updates! Please check manually at " +
                             "http://dev.bukkit.org/bukkit-plugins/guard-dogs");
                     e.printStackTrace();
-                    currentVersion = getDescription().getVersion();
                 }
             }
         });

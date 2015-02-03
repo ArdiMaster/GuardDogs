@@ -41,6 +41,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashSet;
@@ -218,5 +219,20 @@ public class EventListener implements Listener {
         }
         event.setCancelled(true);
         player.sendMessage(ChatColor.DARK_GREEN + event.getMessage() + ChatColor.GREEN + " successfully added.");
+    }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        if (plugin.currentVersion.equals("ERROR")) {
+            return;
+        }
+
+        if (!event.getPlayer().hasPermission("guarddogs.admin")) {
+            return;
+        }
+
+        event.getPlayer().sendMessage(ChatColor.AQUA + "Version " + ChatColor.GREEN + plugin.currentVersion + " of plugin " +
+                ChatColor.DARK_GREEN + "Guard Dogs" + ChatColor.AQUA + " is available! " + ChatColor.DARK_AQUA +
+                "Grab it at http://dev.bukkit.org/bukkit-plugins/guard-dogs");
     }
 }
