@@ -49,6 +49,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
+import java.util.logging.Level;
 
 /**
  * GuardDogs main class
@@ -99,7 +100,7 @@ public class GuardDogs extends JavaPlugin {
             metrics = new Metrics(this);
             metrics.start();
         } catch (IOException e) {
-            logMessage("Could not start metrics! Is outbound communication blocked, or is the server offline?");
+            log(Level.WARNING, "Could not start metrics! Is outbound communication blocked, or is the server offline?");
             e.printStackTrace();
         }
 
@@ -116,19 +117,21 @@ public class GuardDogs extends JavaPlugin {
                     currentVersion = s.nextLine();
                     s.close();
                     if (currentVersion.equals(getDescription().getVersion())) {
-                        logMessage("Plugin up-to-date.");
+                        log(Level.INFO, "Plugin up-to-date.");
                     } else {
-                        logMessage("An update was found! The newest version is " + currentVersion +
+                        log(Level.WARNING, "An update was found! The newest version is " + currentVersion +
                                 ", you are still running " + getDescription().getVersion() + "! Grab it at " +
                                 "http://dev.bukkit.org/bukkit-plugins/guard-dogs");
                     }
                 } catch (IOException e) {
-                    logMessage("Could not check for updates! Please check manually at " +
+                    log(Level.WARNING, "Could not check for updates! Please check manually at " +
                             "http://dev.bukkit.org/bukkit-plugins/guard-dogs");
                     e.printStackTrace();
                 }
             }
         });
+
+        log(Level.INFO, "Plugin loaded and available!");
     }
 
     /** Method ran when plugin gets disabled by server */
@@ -144,8 +147,8 @@ public class GuardDogs extends JavaPlugin {
      *
      * @param message The message to print
      */
-    public void logMessage(String message) {
-        getLogger().info("[" + getDescription().getName() + " " + getDescription().getVersion() + "] " + message);
+    public void log(Level level, String message) {
+        getLogger().log(level, message);
     }
 
     /**
@@ -165,7 +168,7 @@ public class GuardDogs extends JavaPlugin {
         wolf.setSitting(true);
         wolf.setCollarColor(DyeColor.LIME);
         wolf.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 300, 1));
-        logMessage("A new guard dog has been created: " + wolf.getUniqueId().toString());
+        log(Level.INFO, "A new guard dog has been created: " + wolf.getUniqueId().toString());
         saveGuards();
         return true;
     }
@@ -195,7 +198,7 @@ public class GuardDogs extends JavaPlugin {
             guardWaits.remove(wolf);
         }
 
-        logMessage("A guard dog has died: " + wolf.getUniqueId().toString());
+        log(Level.INFO, "A guard dog has died: " + wolf.getUniqueId().toString());
         saveGuards();
         if (wolf.getOwner() instanceof Player) {
             Player player = (Player) wolf.getOwner();
@@ -233,7 +236,7 @@ public class GuardDogs extends JavaPlugin {
             guardWaits.remove(wolf);
         }
 
-        logMessage("A guard dog has been removed: " + wolf.getUniqueId().toString());
+        log(Level.INFO, "A guard dog has been removed: " + wolf.getUniqueId().toString());
         saveGuards();
         return true;
     }
@@ -251,7 +254,7 @@ public class GuardDogs extends JavaPlugin {
             }
             configFile.createNewFile();
         } catch (IOException e) {
-            logMessage("Unable to create config file!");
+            log(Level.WARNING, "Unable to create config file!");
             e.printStackTrace();
             return;
         }
@@ -263,6 +266,7 @@ public class GuardDogs extends JavaPlugin {
             String id = wolf.getUniqueId().toString();
             Location loc = guardPositions.get(wolf);
             if (loc == null) {
+                log(Level.SEVERE, "Something is bad");
                 throw new AssertionError("Attempting to save a guard dog whose position is null! Something went " +
                         "terribly wrong here.");
             }
@@ -290,7 +294,7 @@ public class GuardDogs extends JavaPlugin {
         try {
             config.save(configFile);
         } catch (IOException e) {
-            logMessage("Unable to save guard file!");
+            log(Level.WARNING, "Unable to save guard file!");
         }
 
     }
@@ -300,20 +304,20 @@ public class GuardDogs extends JavaPlugin {
         boolean newConfig = true;
         File configFile = new File(getDataFolder(), configFileName);
         if (!configFile.exists()) {
-            logMessage("No config file.");
+            log(Level.INFO, "No config file.");
             createMat = Material.PUMPKIN_SEEDS;
             disableMat = Material.STICK;
             ignoreMat = Material.GOLD_NUGGET;
             if (Files.exists(new File(getDataFolder(), "guards.yml").toPath())) {
-                logMessage("Found old guards.yml, renaming...");
+                log(Level.INFO, "Found old guards.yml, renaming...");
                 try {
                     Files.move(new File(getDataFolder(), "guards.yml").toPath(), new File(getDataFolder(),
                             configFileName).toPath(), StandardCopyOption.REPLACE_EXISTING);
-                    logMessage("Succeeded, proceeding to load old configuration scheme (will be converted on " +
+                    log(Level.INFO, "Succeeded, proceeding to load old configuration scheme (will be converted on " +
                             "next save)");
                     newConfig = false;
                 } catch (IOException e) {
-                    logMessage("Unable to rename guards.yml to config.yml, proceeding with empty config.");
+                    log(Level.WARNING, "Unable to rename guards.yml to config.yml, proceeding with empty config.");
                     e.printStackTrace();
                 }
 
@@ -388,6 +392,7 @@ public class GuardDogs extends JavaPlugin {
                 }
             }
         }
+        log(Level.INFO, "Loading of config completed.");
     }
 
     /** Method invoked by server when a command is ran */
