@@ -221,7 +221,7 @@ public class EventListener implements Listener {
      */
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        if (plugin.currentVersion.equals("ERROR")) {
+        if (plugin.currentVersion.equals("ERROR") || plugin.currentVersion.equals(plugin.getDescription().getVersion())) {
             return;
         }
 
