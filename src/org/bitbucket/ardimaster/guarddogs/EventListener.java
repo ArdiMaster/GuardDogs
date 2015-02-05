@@ -31,7 +31,6 @@
 package org.bitbucket.ardimaster.guarddogs;
 
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
@@ -137,11 +136,9 @@ public class EventListener implements Listener {
         }
 
         if (event.getEntity() instanceof Wolf) {
-            Entity e = event.getEntity();
-            if (plugin.guards.contains(e)) {
-                if (!plugin.guardTargets.containsKey(e)) {
-                    event.setCancelled(true);
-                }
+            Wolf wolf = (Wolf) event.getEntity();
+            if (plugin.guards.contains(wolf) && !plugin.guardTargets.containsKey(wolf)) {
+                event.setCancelled(true);
             }
         }
     }
