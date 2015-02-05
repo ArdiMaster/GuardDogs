@@ -291,6 +291,9 @@ public class GuardDogs extends JavaPlugin {
             config.set("guards." + id + ".X", loc.getBlockX());
             config.set("guards." + id + ".Y", loc.getBlockY());
             config.set("guards." + id + ".Z", loc.getBlockZ());
+            config.set("guards." + id + ".extraDamage", guardExtraDamage.get(wolf));
+            config.set("guards." + id + ".igniteChance", guardIgniteChance.get(wolf));
+            config.set("guards." + id + ".teleports", guardTeleportCount.get(wolf));
 
             if (guardIgnores.containsKey(wolf)) {
                 ArrayList<String> ignores = new ArrayList<>();
