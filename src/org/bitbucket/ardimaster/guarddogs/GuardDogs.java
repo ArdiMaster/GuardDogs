@@ -74,13 +74,17 @@ public class GuardDogs extends JavaPlugin {
     protected HashMap<Wolf, HashSet<String>> guardIgnores = new HashMap<>();
     /** This HashMap contains the allocation of players --> the guard dogs whose ignores players are currently set */
     protected HashMap<Player, Wolf> settingIgnore = new HashMap<>();
+    /** This HashMap contains the allocation of guard dogs --> the amount of extra damage they deal */
+    protected HashMap<Wolf, Integer> guardExtraDamage = new HashMap<>();
+    /** This HashMap contains the allocation of guard dogs --> the chance of igniting their target upon attack */
+    protected HashMap<Wolf, Integer> guardIgniteChance = new HashMap<>();
+    /** This HashMap contains the allocation of guard dogs --> the number of times they can teleport */
+    protected HashMap<Wolf, Integer> guardTeleportCount = new HashMap<>();
     /** This boolean is true when guard dog targets are currently determined  */
     protected boolean targetDetermination = false;
-    /** The materials required to create / disable a guard dog or to set his ignores */
-    protected Material createMat, disableMat, ignoreMat = null;
-    /**
-     * The most recent version available for download, as determined in onEnable
-     */
+    /** The materials required to right-click a guard dog with */
+    protected Material createMat, disableMat, ignoreMat, extraDamageMat, igniteChanceMat, teleportMat = null;
+    /** The most recent version available for download, as determined in onEnable */
     protected String currentVersion = "ERROR";
     /** The repeating Bukkit task for guard dogs target determination */
     private BukkitTask targetDeterminer;
@@ -155,9 +159,12 @@ public class GuardDogs extends JavaPlugin {
      * This method handles the creation of guard dogs
      *
      * @param wolf The wolf supposed to become a guard dog
+     * @param extraDamage How much extra damage the guard dog will deal
+     * @param igniteChance The chance the guard dog will ignite his target on attack
+     * @param teleports The remaining amount of times the guard dog can teleport back home
      * @return Returns false if the given wolf already is a guard dog, returns true otherwise.
      */
-    public boolean createGuard(Wolf wolf) {
+    public boolean createGuard(Wolf wolf, int extraDamage, int igniteChance, int teleports) {
         if (guards.contains(wolf)) {
             return false;
         }
@@ -165,6 +172,9 @@ public class GuardDogs extends JavaPlugin {
         guards.add(wolf);
         guardPositions.put(wolf, wolf.getLocation());
         guardWaits.put(wolf, 40);
+        guardExtraDamage.put(wolf, extraDamage);
+        guardIgniteChance.put(wolf, igniteChance);
+        guardTeleportCount.put(wolf, teleports);
         wolf.setSitting(true);
         wolf.setCollarColor(DyeColor.LIME);
         wolf.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 300, 1));
@@ -185,6 +195,9 @@ public class GuardDogs extends JavaPlugin {
 
         guards.remove(wolf);
         guardPositions.remove(wolf);
+        guardExtraDamage.remove(wolf);
+        guardIgniteChance.remove(wolf);
+        guardTeleportCount.remove(wolf);
 
         if (guardTargets.containsKey(wolf)) {
             guardTargets.remove(wolf);
@@ -223,6 +236,9 @@ public class GuardDogs extends JavaPlugin {
 
         guards.remove(wolf);
         guardPositions.remove(wolf);
+        guardExtraDamage.remove(wolf);
+        guardIgniteChance.remove(wolf);
+        guardTeleportCount.remove(wolf);
 
         if (guardTargets.containsKey(wolf)) {
             guardTargets.remove(wolf);
@@ -288,13 +304,16 @@ public class GuardDogs extends JavaPlugin {
         config.set("id.create", createMat.toString());
         config.set("id.disable", disableMat.toString());
         config.set("id.ignore", ignoreMat.toString());
+        config.set("id.extaDamage", extraDamageMat.toString());
+        config.set("id.igniteChance", igniteChanceMat.toString());
+        config.set("id.teleport", teleportMat.toString());
 
         config.set("guards.guardids", guardIds);
         config.set("version", getDescription().getVersion());
         try {
             config.save(configFile);
         } catch (IOException e) {
-            log(Level.WARNING, "Unable to save guard file!");
+            log(Level.WARNING, "Unable to save config file!");
         }
 
     }
@@ -308,6 +327,9 @@ public class GuardDogs extends JavaPlugin {
             createMat = Material.PUMPKIN_SEEDS;
             disableMat = Material.STICK;
             ignoreMat = Material.GOLD_NUGGET;
+            extraDamageMat = Material.DIAMOND;
+            igniteChanceMat = Material.BLAZE_POWDER;
+            teleportMat = Material.ENDER_PEARL;
             if (Files.exists(new File(getDataFolder(), "guards.yml").toPath())) {
                 log(Level.INFO, "Found old guards.yml, renaming...");
                 try {
@@ -339,6 +361,9 @@ public class GuardDogs extends JavaPlugin {
             createMat = Material.getMaterial(config.getString("id.create"));
             disableMat = Material.getMaterial(config.getString("id.disable"));
             ignoreMat = Material.getMaterial(config.getString("id.ignore"));
+            extraDamageMat = Material.getMaterial(config.getString("id.extraDamage"));
+            igniteChanceMat = Material.getMaterial(config.getString("id.igniteChance"));
+            teleportMat = Material.getMaterial(config.getString("id.teleport"));
         }
 
         for (World world : getServer().getWorlds()) {
@@ -363,10 +388,7 @@ public class GuardDogs extends JavaPlugin {
                         }
                         Location pos = new Location(posWorld, X, Y, Z);
                         entity.teleport(pos);
-                        guardPositions.put(wolf, pos);
-                        wolf.setSitting(true);
-                        createGuard(wolf);
-                        guardWaits.put(wolf, 40);
+                        createGuard(wolf, 0, 0, 0);
 
                         if (newConfig) {
                             if (config.contains("guards." + uuid + ".ignores")) {

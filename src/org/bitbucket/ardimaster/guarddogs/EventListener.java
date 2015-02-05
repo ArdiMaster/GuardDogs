@@ -81,7 +81,7 @@ public class EventListener implements Listener {
                 return;
             }
 
-            if (plugin.createGuard(wolf)) {
+            if (plugin.createGuard(wolf, 0, 0, 0)) {
                 player.getInventory().removeItem(new ItemStack(plugin.createMat, 1));
                 player.sendMessage(ChatColor.DARK_GREEN + "Guard dog" + ChatColor.GREEN + " ready for action");
             } else {
