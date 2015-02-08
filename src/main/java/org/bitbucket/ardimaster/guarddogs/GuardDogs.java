@@ -68,7 +68,7 @@ public class GuardDogs extends JavaPlugin {
     protected boolean targetDetermination = false;
     protected Material createMat, disableMat, ignoreMat, extraDamageMat, igniteChanceMat, teleportMat = null;
     protected String currentVersion = "ERROR";
-    protected boolean notifyUpdates, extraDamage, igniteChance, teleport = true;
+    protected boolean notifyUpdates, extraDamage, igniteChance, teleport;
     private BukkitTask targetDeterminer;
     private BukkitTask guardTicker;
     private Metrics metrics;
@@ -270,6 +270,10 @@ public class GuardDogs extends JavaPlugin {
         config.set("id.extaDamage", extraDamageMat.toString());
         config.set("id.igniteChance", igniteChanceMat.toString());
         config.set("id.teleport", teleportMat.toString());
+        config.set("special.extraDamage", Boolean.valueOf(extraDamage));
+        config.set("special.igniteChance", Boolean.valueOf(igniteChance));
+        config.set("special.teleport", Boolean.valueOf(teleport));
+        config.set("notifyUpdates", Boolean.valueOf(notifyUpdates));
 
         config.set("guards.guardids", guardIds);
         config.set("version", getDescription().getVersion());
@@ -302,6 +306,10 @@ public class GuardDogs extends JavaPlugin {
                     extraDamageMat = Material.DIAMOND;
                     igniteChanceMat = Material.BLAZE_POWDER;
                     teleportMat = Material.ENDER_PEARL;
+                    extraDamage = true;
+                    igniteChance = true;
+                    teleport = true;
+                    notifyUpdates = true;
                     return;
                 }
 
@@ -313,6 +321,10 @@ public class GuardDogs extends JavaPlugin {
                 extraDamageMat = Material.DIAMOND;
                 igniteChanceMat = Material.BLAZE_POWDER;
                 teleportMat = Material.ENDER_PEARL;
+                extraDamage = true;
+                igniteChance = true;
+                teleport = true;
+                notifyUpdates = true;
                 return;
             }
         }
@@ -338,26 +350,47 @@ public class GuardDogs extends JavaPlugin {
                 createMat = Material.PUMPKIN_SEEDS;
                 disableMat = Material.STICK;
                 ignoreMat = Material.GOLD_NUGGET;
+
                 extraDamageMat = Material.DIAMOND;
                 igniteChanceMat = Material.BLAZE_POWDER;
                 teleportMat = Material.ENDER_PEARL;
+
+                extraDamage = true;
+                igniteChance = true;
+                teleport = true;
+
+                notifyUpdates = true;
                 break;
             case "0.6":
             case "0.6.5":
                 createMat = Material.getMaterial(config.getString("id.create"));
                 disableMat = Material.getMaterial(config.getString("id.disable"));
                 ignoreMat = Material.getMaterial(config.getString("id.ignore"));
+
                 extraDamageMat = Material.DIAMOND;
                 igniteChanceMat = Material.BLAZE_POWDER;
                 teleportMat = Material.ENDER_PEARL;
+
+                extraDamage = true;
+                igniteChance = true;
+                teleport = true;
+
+                notifyUpdates = true;
                 break;
             default:
                 createMat = Material.getMaterial(config.getString("id.create"));
                 disableMat = Material.getMaterial(config.getString("id.disable"));
                 ignoreMat = Material.getMaterial(config.getString("id.ignore"));
+
                 extraDamageMat = Material.getMaterial(config.getString("id.extraDamage"));
                 igniteChanceMat = Material.getMaterial(config.getString("id.igniteChance"));
                 teleportMat = Material.getMaterial(config.getString("id.teleport"));
+
+                extraDamage = config.getBoolean("special.extraDamage");
+                igniteChance = config.getBoolean("special.igniteChance");
+                teleport = config.getBoolean("special.teleport");
+
+                notifyUpdates = config.getBoolean("notifyUpdates");
                 break;
         }
 
@@ -383,9 +416,9 @@ public class GuardDogs extends JavaPlugin {
                                 break;
                             default:
                                 posWorld = getServer().getWorld(config.getString("guards." + uuid + ".world"));
-                                X = Integer.parseInt(config.getString("guards." + uuid + ".X"));
-                                Y = Integer.parseInt(config.getString("guards." + uuid + ".Y"));
-                                Z = Integer.parseInt(config.getString("guards." + uuid + ".Z"));
+                                X = config.getInt("guards." + uuid + ".X");
+                                Y = config.getInt("guards." + uuid + ".Y");
+                                Z = config.getInt("guards." + uuid + ".Z");
                                 switch (configVersion) {
                                     case "0.6":
                                     case "0.6.5":
@@ -394,9 +427,9 @@ public class GuardDogs extends JavaPlugin {
                                         teleports = 0;
                                         break;
                                     default:
-                                        extraDamage = Integer.parseInt(config.getString("guards." + uuid + ".extraDamage"));
-                                        igniteChance = Integer.parseInt(config.getString("guards." + uuid + ".igniteChance"));
-                                        teleports = Integer.parseInt(config.getString("guards." + uuid + ".teleports"));
+                                        extraDamage = config.getInt("guards." + uuid + ".extraDamage");
+                                        igniteChance = config.getInt("guards." + uuid + ".igniteChance");
+                                        teleports = config.getInt("guards." + uuid + ".teleports");
                                         break;
                                 }
                                 break;
