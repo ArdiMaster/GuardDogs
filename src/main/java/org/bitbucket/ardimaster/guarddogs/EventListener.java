@@ -115,6 +115,95 @@ public class EventListener implements Listener {
                     "player you wish to have this guard dog ignore.");
 
             plugin.settingIgnore.put(player, wolf);
+        } else if (player.getItemInHand().getType().equals(plugin.extraDamageMat)) {
+            if (!wolf.isTamed() || !wolf.getOwner().equals(player)) {
+                player.sendMessage(ChatColor.RED + "This isn't your dog. Thus, it can't be your guard dog. " +
+                        "Thus, you can't have it deal extra damage.");
+                return;
+            }
+
+            if (!plugin.guards.contains(wolf)) {
+                player.sendMessage(ChatColor.RED + "This isn't a guard dog. Thus, you can't have it " +
+                        "deal extra damage.");
+                return;
+            }
+
+            if (!plugin.extraDamage) {
+                player.sendMessage(ChatColor.RED + "Guard dogs extra damage is disabled on this server!");
+                return;
+            }
+
+            int damage = plugin.guardExtraDamage.get(wolf);
+            if (damage < 2) {
+                player.getInventory().remove(new ItemStack(plugin.extraDamageMat, 1));
+                damage++;
+                plugin.guardExtraDamage.put(wolf, damage);
+                player.sendMessage(ChatColor.GREEN + "This " + ChatColor.DARK_GREEN + "Guard Dog" + ChatColor.GREEN +
+                        "'s extra damage is now " + ChatColor.AQUA + damage + ChatColor.GREEN + " half-hearts");
+            } else {
+                player.sendMessage(ChatColor.RED + "This " + ChatColor.DARK_GREEN + "Guard Dog" + ChatColor.RED +
+                        "'s extra damage is already at maximum!");
+            }
+        } else if (player.getItemInHand().getType().equals(plugin.igniteChanceMat)) {
+            if (!wolf.isTamed() || !wolf.getOwner().equals(player)) {
+                player.sendMessage(ChatColor.RED + "This isn't your dog. Thus, it can't be your guard dog. " +
+                        "Thus, you can't have it ignite it's enemies.");
+                return;
+            }
+
+            if (!plugin.guards.contains(wolf)) {
+                player.sendMessage(ChatColor.RED + "This isn't a guard dog. Thus, you can't have it " +
+                        "ignite it's enemies.");
+                return;
+            }
+
+            if (!plugin.extraDamage) {
+                player.sendMessage(ChatColor.RED + "Guard dogs igniting their enemies is disabled on this server!");
+                return;
+            }
+
+            int chance = plugin.guardIgniteChance.get(wolf);
+            if (chance < 6) {
+                player.getInventory().remove(new ItemStack(plugin.igniteChanceMat, 1));
+                chance++;
+                plugin.guardExtraDamage.put(wolf, chance);
+                player.sendMessage(ChatColor.GREEN + "This " + ChatColor.DARK_GREEN + "Guard Dog" + ChatColor.GREEN +
+                        "'s chance to ignite it's enemy is now " + ChatColor.AQUA + chance + ChatColor.GREEN + " %");
+            } else {
+                player.sendMessage(ChatColor.RED + "This " + ChatColor.DARK_GREEN + "Guard Dog" + ChatColor.RED +
+                        "'s chance to ignite it's enemies is already at maximum!");
+            }
+        } else if (player.getItemInHand().getType().equals(plugin.teleportMat)) {
+            if (!wolf.isTamed() || !wolf.getOwner().equals(player)) {
+                player.sendMessage(ChatColor.RED + "This isn't your dog. Thus, it can't be your guard dog. " +
+                        "Thus, you can't have it teleport home when it's low on health.");
+                return;
+            }
+
+            if (!plugin.guards.contains(wolf)) {
+                player.sendMessage(ChatColor.RED + "This isn't a guard dog. Thus, you can't have it " +
+                        "teleport home when it's low on health.");
+                return;
+            }
+
+            if (!plugin.extraDamage) {
+                player.sendMessage(ChatColor.RED + "Guard dogs teleporting home when low on health is disabled " +
+                        "on this server!");
+                return;
+            }
+
+            int teleport = plugin.guardTeleportCount.get(wolf);
+            if (teleport < 16) {
+                player.getInventory().remove(new ItemStack(plugin.teleportMat, 1));
+                teleport++;
+                plugin.guardExtraDamage.put(wolf, teleport);
+                player.sendMessage(ChatColor.GREEN + "This " + ChatColor.DARK_GREEN + "Guard Dog" + ChatColor.GREEN +
+                        "can now teleport home  " + ChatColor.AQUA + teleport + ChatColor.GREEN +
+                        " times when low on health.");
+            } else {
+                player.sendMessage(ChatColor.RED + "When low on health, this " + ChatColor.DARK_GREEN + "Guard Dog" +
+                        ChatColor.RED + " can already teleport home the maximum amount of times!");
+            }
         }
 
     }
@@ -200,8 +289,8 @@ public class EventListener implements Listener {
             return;
         }
 
-        event.getPlayer().sendMessage(ChatColor.AQUA + "Version " + ChatColor.GREEN + plugin.currentVersion + " of plugin " +
-                ChatColor.DARK_GREEN + "Guard Dogs" + ChatColor.AQUA + " is available! " + ChatColor.DARK_AQUA +
-                "Grab it at http://dev.bukkit.org/bukkit-plugins/guard-dogs");
+        event.getPlayer().sendMessage(ChatColor.AQUA + "Version " + ChatColor.GREEN + plugin.currentVersion +
+                " of plugin " + ChatColor.DARK_GREEN + "Guard Dogs" + ChatColor.AQUA + " is available! " +
+                ChatColor.DARK_AQUA + "Grab it at http://dev.bukkit.org/bukkit-plugins/guard-dogs");
     }
 }
