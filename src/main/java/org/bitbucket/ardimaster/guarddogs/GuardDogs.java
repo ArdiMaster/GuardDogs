@@ -303,12 +303,15 @@ public class GuardDogs extends JavaPlugin {
                     createMat = Material.PUMPKIN_SEEDS;
                     disableMat = Material.STICK;
                     ignoreMat = Material.GOLD_NUGGET;
+
                     extraDamageMat = Material.DIAMOND;
                     igniteChanceMat = Material.BLAZE_POWDER;
                     teleportMat = Material.ENDER_PEARL;
+
                     extraDamage = true;
                     igniteChance = true;
                     teleport = true;
+
                     notifyUpdates = true;
                     return;
                 }
@@ -318,12 +321,15 @@ public class GuardDogs extends JavaPlugin {
                 createMat = Material.PUMPKIN_SEEDS;
                 disableMat = Material.STICK;
                 ignoreMat = Material.GOLD_NUGGET;
+
                 extraDamageMat = Material.DIAMOND;
                 igniteChanceMat = Material.BLAZE_POWDER;
                 teleportMat = Material.ENDER_PEARL;
+
                 extraDamage = true;
                 igniteChance = true;
                 teleport = true;
+
                 notifyUpdates = true;
                 return;
             }

@@ -193,11 +193,10 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        if (plugin.currentVersion.equals("ERROR") || plugin.currentVersion.equals(plugin.getDescription().getVersion())) {
-            return;
-        }
-
-        if (!event.getPlayer().hasPermission("guarddogs.admin")) {
+        if (plugin.currentVersion.equals("ERROR") ||
+                plugin.currentVersion.equals(plugin.getDescription().getVersion()) ||
+                !event.getPlayer().hasPermission("guarddogs.admin") ||
+                !plugin.notifyUpdates) {
             return;
         }
 
