@@ -270,10 +270,10 @@ public class GuardDogs extends JavaPlugin {
         config.set("id.extaDamage", extraDamageMat.toString());
         config.set("id.igniteChance", igniteChanceMat.toString());
         config.set("id.teleport", teleportMat.toString());
-        config.set("special.extraDamage", Boolean.valueOf(extraDamage));
-        config.set("special.igniteChance", Boolean.valueOf(igniteChance));
-        config.set("special.teleport", Boolean.valueOf(teleport));
-        config.set("notifyUpdates", Boolean.valueOf(notifyUpdates));
+        config.set("special.extraDamage", extraDamage);
+        config.set("special.igniteChance", igniteChance);
+        config.set("special.teleport", teleport);
+        config.set("notifyUpdates", notifyUpdates);
 
         config.set("guards.guardids", guardIds);
         config.set("version", getDescription().getVersion());
