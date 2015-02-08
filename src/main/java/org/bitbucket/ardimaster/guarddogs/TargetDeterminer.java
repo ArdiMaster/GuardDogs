@@ -72,10 +72,7 @@ public class TargetDeterminer extends BukkitRunnable {
                     }
 
                     if (e instanceof Wolf) {
-                        if (plugin.guards.contains(e)) {
-                            continue;
-                        }
-                        if (wolf.getOwner().equals(((Wolf) e).getOwner())) {
+                        if (plugin.guards.contains(e) || wolf.getOwner().equals(((Wolf) e).getOwner())) {
                             continue;
                         }
                     }
