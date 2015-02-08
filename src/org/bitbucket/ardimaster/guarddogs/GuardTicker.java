@@ -57,13 +57,11 @@ public class GuardTicker extends BukkitRunnable {
                 }
             }
 
-            if (plugin.guardTargets.containsKey(wolf) || wolf.isSitting()) {
-                continue;
+            if (!plugin.guardTargets.containsKey(wolf) && !wolf.isSitting()) {
+                plugin.guardWaits.put(wolf, 20);
+                wolf.teleport(plugin.guardPositions.get(wolf));
+                wolf.setSitting(true);
             }
-
-            plugin.guardWaits.put(wolf, 20);
-            wolf.teleport(plugin.guardPositions.get(wolf));
-            wolf.setSitting(true);
         }
     }
 }

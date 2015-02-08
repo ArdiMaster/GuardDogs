@@ -74,17 +74,13 @@ public class GuardDogs extends JavaPlugin {
     protected HashMap<Wolf, HashSet<String>> guardIgnores = new HashMap<>();
     /** This HashMap contains the allocation of players --> the guard dogs whose ignores players are currently set */
     protected HashMap<Player, Wolf> settingIgnore = new HashMap<>();
-    /** This HashMap contains the allocation of guard dogs --> the amount of extra damage they deal */
-    protected HashMap<Wolf, Integer> guardExtraDamage = new HashMap<>();
-    /** This HashMap contains the allocation of guard dogs --> the chance of igniting their target upon attack */
-    protected HashMap<Wolf, Integer> guardIgniteChance = new HashMap<>();
-    /** This HashMap contains the allocation of guard dogs --> the number of times they can teleport */
-    protected HashMap<Wolf, Integer> guardTeleportCount = new HashMap<>();
     /** This boolean is true when guard dog targets are currently determined  */
     protected boolean targetDetermination = false;
-    /** The materials required to right-click a guard dog with */
-    protected Material createMat, disableMat, ignoreMat, extraDamageMat, igniteChanceMat, teleportMat = null;
-    /** The most recent version available for download, as determined in onEnable */
+    /** The materials required to create / disable a guard dog or to set his ignores */
+    protected Material createMat, disableMat, ignoreMat = null;
+    /**
+     * The most recent version available for download, as determined in onEnable
+     */
     protected String currentVersion = "ERROR";
     /** The repeating Bukkit task for guard dogs target determination */
     private BukkitTask targetDeterminer;
@@ -159,12 +155,9 @@ public class GuardDogs extends JavaPlugin {
      * This method handles the creation of guard dogs
      *
      * @param wolf The wolf supposed to become a guard dog
-     * @param extraDamage How much extra damage the guard dog will deal
-     * @param igniteChance The chance the guard dog will ignite his target on attack
-     * @param teleports The remaining amount of times the guard dog can teleport back home
      * @return Returns false if the given wolf already is a guard dog, returns true otherwise.
      */
-    public boolean createGuard(Wolf wolf, int extraDamage, int igniteChance, int teleports) {
+    public boolean createGuard(Wolf wolf) {
         if (guards.contains(wolf)) {
             return false;
         }
@@ -172,9 +165,6 @@ public class GuardDogs extends JavaPlugin {
         guards.add(wolf);
         guardPositions.put(wolf, wolf.getLocation());
         guardWaits.put(wolf, 40);
-        guardExtraDamage.put(wolf, extraDamage);
-        guardIgniteChance.put(wolf, igniteChance);
-        guardTeleportCount.put(wolf, teleports);
         wolf.setSitting(true);
         wolf.setCollarColor(DyeColor.LIME);
         wolf.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 300, 1));
@@ -195,9 +185,6 @@ public class GuardDogs extends JavaPlugin {
 
         guards.remove(wolf);
         guardPositions.remove(wolf);
-        guardExtraDamage.remove(wolf);
-        guardIgniteChance.remove(wolf);
-        guardTeleportCount.remove(wolf);
 
         if (guardTargets.containsKey(wolf)) {
             guardTargets.remove(wolf);
@@ -236,9 +223,6 @@ public class GuardDogs extends JavaPlugin {
 
         guards.remove(wolf);
         guardPositions.remove(wolf);
-        guardExtraDamage.remove(wolf);
-        guardIgniteChance.remove(wolf);
-        guardTeleportCount.remove(wolf);
 
         if (guardTargets.containsKey(wolf)) {
             guardTargets.remove(wolf);
@@ -291,9 +275,6 @@ public class GuardDogs extends JavaPlugin {
             config.set("guards." + id + ".X", loc.getBlockX());
             config.set("guards." + id + ".Y", loc.getBlockY());
             config.set("guards." + id + ".Z", loc.getBlockZ());
-            config.set("guards." + id + ".extraDamage", guardExtraDamage.get(wolf));
-            config.set("guards." + id + ".igniteChance", guardIgniteChance.get(wolf));
-            config.set("guards." + id + ".teleports", guardTeleportCount.get(wolf));
 
             if (guardIgnores.containsKey(wolf)) {
                 ArrayList<String> ignores = new ArrayList<>();
@@ -307,25 +288,26 @@ public class GuardDogs extends JavaPlugin {
         config.set("id.create", createMat.toString());
         config.set("id.disable", disableMat.toString());
         config.set("id.ignore", ignoreMat.toString());
-        config.set("id.extaDamage", extraDamageMat.toString());
-        config.set("id.igniteChance", igniteChanceMat.toString());
-        config.set("id.teleport", teleportMat.toString());
 
         config.set("guards.guardids", guardIds);
         config.set("version", getDescription().getVersion());
         try {
             config.save(configFile);
         } catch (IOException e) {
-            log(Level.WARNING, "Unable to save config file!");
+            log(Level.WARNING, "Unable to save guard file!");
         }
 
     }
 
     /** Method invoked to load all config and guard dogs from disk */
     protected void loadGuards() {
-        String configVersion = "unknown";
+        boolean newConfig = true;
         File configFile = new File(getDataFolder(), configFileName);
         if (!configFile.exists()) {
+            log(Level.INFO, "No config file.");
+            createMat = Material.PUMPKIN_SEEDS;
+            disableMat = Material.STICK;
+            ignoreMat = Material.GOLD_NUGGET;
             if (Files.exists(new File(getDataFolder(), "guards.yml").toPath())) {
                 log(Level.INFO, "Found old guards.yml, renaming...");
                 try {
@@ -333,73 +315,30 @@ public class GuardDogs extends JavaPlugin {
                             configFileName).toPath(), StandardCopyOption.REPLACE_EXISTING);
                     log(Level.INFO, "Succeeded, proceeding to load old configuration scheme (will be converted on " +
                             "next save)");
-                    configVersion = "0.5.6";
+                    newConfig = false;
                 } catch (IOException e) {
                     log(Level.WARNING, "Unable to rename guards.yml to config.yml, proceeding with empty config.");
                     e.printStackTrace();
-                    createMat = Material.PUMPKIN_SEEDS;
-                    disableMat = Material.STICK;
-                    ignoreMat = Material.GOLD_NUGGET;
-                    extraDamageMat = Material.DIAMOND;
-                    igniteChanceMat = Material.BLAZE_POWDER;
-                    teleportMat = Material.ENDER_PEARL;
-                    return;
                 }
 
             } else {
-                log(Level.INFO, "No config file.");
-                createMat = Material.PUMPKIN_SEEDS;
-                disableMat = Material.STICK;
-                ignoreMat = Material.GOLD_NUGGET;
-                extraDamageMat = Material.DIAMOND;
-                igniteChanceMat = Material.BLAZE_POWDER;
-                teleportMat = Material.ENDER_PEARL;
                 return;
             }
         }
 
         FileConfiguration config = YamlConfiguration.loadConfiguration(configFile);
 
-        if (configVersion.equals("unkown")) {
-            configVersion = config.getString("version");
-        }
-
         List<String> guardIds;
-        switch (configVersion) {
-            case "0.5.6":
-                guardIds = config.getStringList("guards");
-                break;
-            default:
-                guardIds = config.getStringList("guards.guardids");
-                break;
+        if (newConfig) {
+            guardIds = config.getStringList("guards.guardids");
+        } else {
+            guardIds = config.getStringList("guards");
         }
 
-        switch (configVersion) {
-            case "0.5.6":
-                createMat = Material.PUMPKIN_SEEDS;
-                disableMat = Material.STICK;
-                ignoreMat = Material.GOLD_NUGGET;
-                extraDamageMat = Material.DIAMOND;
-                igniteChanceMat = Material.BLAZE_POWDER;
-                teleportMat = Material.ENDER_PEARL;
-                break;
-            case "0.6":
-            case "0.6.5":
-                createMat = Material.getMaterial(config.getString("id.create"));
-                disableMat = Material.getMaterial(config.getString("id.disable"));
-                ignoreMat = Material.getMaterial(config.getString("id.ignore"));
-                extraDamageMat = Material.DIAMOND;
-                igniteChanceMat = Material.BLAZE_POWDER;
-                teleportMat = Material.ENDER_PEARL;
-                break;
-            default:
-                createMat = Material.getMaterial(config.getString("id.create"));
-                disableMat = Material.getMaterial(config.getString("id.disable"));
-                ignoreMat = Material.getMaterial(config.getString("id.ignore"));
-                extraDamageMat = Material.getMaterial(config.getString("id.extraDamage"));
-                igniteChanceMat = Material.getMaterial(config.getString("id.igniteChance"));
-                teleportMat = Material.getMaterial(config.getString("id.teleport"));
-                break;
+        if (newConfig) {
+            createMat = Material.getMaterial(config.getString("id.create"));
+            disableMat = Material.getMaterial(config.getString("id.disable"));
+            ignoreMat = Material.getMaterial(config.getString("id.ignore"));
         }
 
         for (World world : getServer().getWorlds()) {
@@ -410,70 +349,50 @@ public class GuardDogs extends JavaPlugin {
                         String uuid = wolf.getUniqueId().toString();
 
                         World posWorld;
-                        int X, Y, Z, extraDamage, igniteChance, teleports;
-
-                        switch (configVersion) {
-                            case "0.5.6":
-                                posWorld = getServer().getWorld((String) config.get(uuid + ".world"));
-                                X = Integer.parseInt((String) config.get(uuid + ".X"));
-                                Y = Integer.parseInt((String) config.get(uuid + ".Y"));
-                                Z = Integer.parseInt((String) config.get(uuid + ".Z"));
-                                extraDamage = 0;
-                                igniteChance = 0;
-                                teleports = 0;
-                                break;
-                            default:
-                                posWorld = getServer().getWorld(config.getString("guards." + uuid + ".world"));
-                                X = Integer.parseInt(config.getString("guards." + uuid + ".X"));
-                                Y = Integer.parseInt(config.getString("guards." + uuid + ".Y"));
-                                Z = Integer.parseInt(config.getString("guards." + uuid + ".Z"));
-                                switch (configVersion) {
-                                    case "0.6":
-                                    case "0.6.5":
-                                        extraDamage = 0;
-                                        igniteChance = 0;
-                                        teleports = 0;
-                                        break;
-                                    default:
-                                        extraDamage = Integer.parseInt(config.getString("guards." + uuid + ".extraDamage"));
-                                        igniteChance = Integer.parseInt(config.getString("guards." + uuid + ".igniteChance"));
-                                        teleports = Integer.parseInt(config.getString("guards." + uuid + ".teleports"));
-                                        break;
-                                }
-                                break;
+                        int X, Y, Z;
+                        if (newConfig) {
+                            posWorld = getServer().getWorld(config.getString("guards." + uuid + ".world"));
+                            X = Integer.parseInt(config.getString("guards." + uuid + ".X"));
+                            Y = Integer.parseInt(config.getString("guards." + uuid + ".Y"));
+                            Z = Integer.parseInt(config.getString("guards." + uuid + ".Z"));
+                        } else {
+                            posWorld = getServer().getWorld((String) config.get(uuid + ".world"));
+                            X = Integer.parseInt((String) config.get(uuid + ".X"));
+                            Y = Integer.parseInt((String) config.get(uuid + ".Y"));
+                            Z = Integer.parseInt((String) config.get(uuid + ".Z"));
                         }
                         Location pos = new Location(posWorld, X, Y, Z);
                         entity.teleport(pos);
-                        createGuard(wolf, extraDamage, igniteChance, teleports);
+                        guardPositions.put(wolf, pos);
+                        wolf.setSitting(true);
+                        createGuard(wolf);
+                        guardWaits.put(wolf, 40);
 
-                        switch (configVersion) {
-                            case "0.5.6":
-                                if (config.contains(uuid + ".ignores")) {
-                                    List<String> ignores = config.getStringList(uuid + ".ignores");
-                                    HashSet<String> putIgnores = new HashSet<>();
-                                    for (String s : ignores) {
-                                        putIgnores.add(s);
-                                    }
-                                    guardIgnores.put(wolf, putIgnores);
+                        if (newConfig) {
+                            if (config.contains("guards." + uuid + ".ignores")) {
+                                List<String> ignores = config.getStringList(uuid + ".ignores");
+                                HashSet<String> putIgnores = new HashSet<>();
+                                for (String s : ignores) {
+                                    putIgnores.add(s);
                                 }
-                                break;
-                            default:
-                                if (config.contains("guards." + uuid + ".ignores")) {
-                                    List<String> ignores = config.getStringList("guards." + uuid + ".ignores");
-                                    HashSet<String> putIgnores = new HashSet<>();
-                                    for (String s : ignores) {
-                                        putIgnores.add(s);
-                                    }
-                                    guardIgnores.put(wolf, putIgnores);
+                                guardIgnores.put(wolf, putIgnores);
+                            }
+                        } else {
+                            if (config.contains(uuid + ".ignores")) {
+                                List<String> ignores = config.getStringList(uuid + ".ignores");
+                                HashSet<String> putIgnores = new HashSet<>();
+                                for (String s : ignores) {
+                                    putIgnores.add(s);
                                 }
-                                break;
+                                guardIgnores.put(wolf, putIgnores);
+                            }
                         }
 
                     }
                 }
             }
         }
-        log(Level.INFO, "Loading of config [config file of plugin version " + configVersion + "] completed.");
+        log(Level.INFO, "Loading of config completed.");
     }
 
     /** Method invoked by server when a command is ran */

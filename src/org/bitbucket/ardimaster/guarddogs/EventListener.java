@@ -31,6 +31,7 @@
 package org.bitbucket.ardimaster.guarddogs;
 
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
@@ -80,7 +81,7 @@ public class EventListener implements Listener {
                 return;
             }
 
-            if (plugin.createGuard(wolf, 0, 0, 0)) {
+            if (plugin.createGuard(wolf)) {
                 player.getInventory().removeItem(new ItemStack(plugin.createMat, 1));
                 player.sendMessage(ChatColor.DARK_GREEN + "Guard dog" + ChatColor.GREEN + " ready for action");
             } else {
@@ -136,9 +137,11 @@ public class EventListener implements Listener {
         }
 
         if (event.getEntity() instanceof Wolf) {
-            Wolf wolf = (Wolf) event.getEntity();
-            if (plugin.guards.contains(wolf) && !plugin.guardTargets.containsKey(wolf)) {
-                event.setCancelled(true);
+            Entity e = event.getEntity();
+            if (plugin.guards.contains(e)) {
+                if (!plugin.guardTargets.containsKey(e)) {
+                    event.setCancelled(true);
+                }
             }
         }
     }
