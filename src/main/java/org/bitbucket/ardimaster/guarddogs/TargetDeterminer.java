@@ -38,8 +38,6 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * This class contains the repeating Bukkit task to determine targets for the guard dogs.
- *
  * @author ArdiMaster
  */
 public class TargetDeterminer extends BukkitRunnable {

@@ -52,48 +52,27 @@ import java.util.*;
 import java.util.logging.Level;
 
 /**
- * GuardDogs main class
- *
  * @author ArdiMaster
  */
 public class GuardDogs extends JavaPlugin {
-
-    /**
-     * The name of the configuration file
-     */
     protected String configFileName = "config.yml";
-    /** This HashSet holds all the guard dogs */
     protected HashSet<Wolf> guards = new HashSet<>();
-    /** This HashMap contains the allocation of guard dogs --> targets */
     protected HashMap<Wolf, LivingEntity> guardTargets = new HashMap<>();
-    /** This HashMap contains the allocation of guard dogs --> location */
     protected HashMap<Wolf, Location> guardPositions = new HashMap<>();
-    /** This HashMap contains the allocation of guard dogs --> their wait countdown */
     protected HashMap<Wolf, Integer> guardWaits = new HashMap<>();
-    /** This HashMap contains the allocation of guard dogs --> their ignored players */
     protected HashMap<Wolf, HashSet<String>> guardIgnores = new HashMap<>();
-    /** This HashMap contains the allocation of players --> the guard dogs whose ignores players are currently set */
     protected HashMap<Player, Wolf> settingIgnore = new HashMap<>();
-    /** This HashMap contains the allocation of guard dogs --> the amount of extra damage they deal */
     protected HashMap<Wolf, Integer> guardExtraDamage = new HashMap<>();
-    /** This HashMap contains the allocation of guard dogs --> the chance of igniting their target upon attack */
     protected HashMap<Wolf, Integer> guardIgniteChance = new HashMap<>();
-    /** This HashMap contains the allocation of guard dogs --> the number of times they can teleport */
     protected HashMap<Wolf, Integer> guardTeleportCount = new HashMap<>();
-    /** This boolean is true when guard dog targets are currently determined  */
     protected boolean targetDetermination = false;
-    /** The materials required to right-click a guard dog with */
     protected Material createMat, disableMat, ignoreMat, extraDamageMat, igniteChanceMat, teleportMat = null;
-    /** The most recent version available for download, as determined in onEnable */
     protected String currentVersion = "ERROR";
-    /** The repeating Bukkit task for guard dogs target determination */
+    protected boolean notifyUpdates, extraDamage, igniteChance, teleport = true;
     private BukkitTask targetDeterminer;
-    /** The repeating Bukkit task for guard dogs countdowns */
     private BukkitTask guardTicker;
-    /** The Plugin Metrics / MCStats instance */
     private Metrics metrics;
 
-    /** Method ran when plugin gets enabled by server  */
     @Override
     public void onEnable() {
         loadGuards();
@@ -138,7 +117,6 @@ public class GuardDogs extends JavaPlugin {
         log(Level.INFO, "Plugin loaded and available!");
     }
 
-    /** Method ran when plugin gets disabled by server */
     @Override
     public void onDisable() {
         targetDeterminer.cancel();
@@ -146,11 +124,6 @@ public class GuardDogs extends JavaPlugin {
         saveGuards();
     }
 
-    /**
-     * Method invoked to print informational log messages
-     *
-     * @param message The message to print
-     */
     public void log(Level level, String message) {
         getLogger().log(level, message);
     }
@@ -183,11 +156,6 @@ public class GuardDogs extends JavaPlugin {
         return true;
     }
 
-    /**
-     * Method invoked when a wolf dies
-     *
-     * @param wolf The wolf which died
-     */
     public void deadGuard(Wolf wolf) {
         if (!guards.contains(wolf)) {
             return;
@@ -222,14 +190,7 @@ public class GuardDogs extends JavaPlugin {
         }
     }
 
-    /**
-     * Method invoked when a guard dog is requested to be removed / disabled
-     *
-     * @param wolf The wolf requested to be removed
-     * @param player Currently unused, will be removed soon.
-     * @return Whether the requested wolf was a guard dog. (true if he was)
-     */
-    public boolean removeGuard(Wolf wolf, Player player) {
+    public boolean removeGuard(Wolf wolf) {
         if (!guards.contains(wolf)) {
             return false;
         }
@@ -257,7 +218,6 @@ public class GuardDogs extends JavaPlugin {
         return true;
     }
 
-    /** Method invoked to save all configuration and guard dogs to disk */
     public void saveGuards() {
         File configFile = new File(getDataFolder(), configFileName);
         if (configFile.exists()) {
@@ -321,7 +281,6 @@ public class GuardDogs extends JavaPlugin {
 
     }
 
-    /** Method invoked to load all config and guard dogs from disk */
     protected void loadGuards() {
         String configVersion = "unknown";
         File configFile = new File(getDataFolder(), configFileName);
@@ -476,7 +435,6 @@ public class GuardDogs extends JavaPlugin {
         log(Level.INFO, "Loading of config [config file of plugin version " + configVersion + "] completed.");
     }
 
-    /** Method invoked by server when a command is ran */
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
         if (cmd.getName().equalsIgnoreCase("guarddogs")) {
             if (sender instanceof Player) {

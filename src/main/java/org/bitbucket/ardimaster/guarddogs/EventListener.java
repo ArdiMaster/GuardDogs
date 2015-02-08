@@ -55,11 +55,6 @@ public class EventListener implements Listener {
         this.plugin = plugin;
     }
 
-    /**
-     * Invoked by the server when a player right-clicks an entity
-     *
-     * @param event The triggered event
-     */
     @EventHandler
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
         if (!(event.getRightClicked() instanceof Wolf)) {
@@ -94,7 +89,7 @@ public class EventListener implements Listener {
                 return;
             }
 
-            if (plugin.removeGuard(wolf, player)) {
+            if (plugin.removeGuard(wolf)) {
                 player.sendMessage(ChatColor.DARK_GREEN + "Guard dog " + ChatColor.AQUA + "disabled.");
             } else {
                 player.sendMessage(ChatColor.RED + "This isn't a guard dog, it's just a normal dog!");
@@ -124,11 +119,6 @@ public class EventListener implements Listener {
 
     }
 
-    /**
-     * Invoked by the server ven an entity gets damaged by entity
-     *
-     * @param event The event
-     */
     @EventHandler
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
         if (plugin.targetDetermination) {
@@ -143,11 +133,6 @@ public class EventListener implements Listener {
         }
     }
 
-    /**
-     * Invoked when an entity dies
-     *
-     * @param event The event
-     */
     @EventHandler
     public void onEntityDeath(EntityDeathEvent event) {
         if (event.getEntity() instanceof Wolf) {
@@ -172,11 +157,6 @@ public class EventListener implements Listener {
         }
     }
 
-    /**
-     * Invoked when a player chats
-     *
-     * @param event The event
-     */
     @EventHandler
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         if (!plugin.settingIgnore.containsKey(event.getPlayer())) {
@@ -211,11 +191,6 @@ public class EventListener implements Listener {
         player.sendMessage(ChatColor.DARK_GREEN + event.getMessage() + ChatColor.GREEN + " successfully added.");
     }
 
-    /**
-     * Invoked when a player joins the game.
-     *
-     * @param event The event
-     */
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         if (plugin.currentVersion.equals("ERROR") || plugin.currentVersion.equals(plugin.getDescription().getVersion())) {
