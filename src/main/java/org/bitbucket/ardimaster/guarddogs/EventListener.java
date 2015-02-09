@@ -42,6 +42,8 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.HashSet;
 import java.util.Random;
@@ -226,12 +228,22 @@ public class EventListener implements Listener {
             }
         }
 
-        if (plugin.targetDetermination) {
-            return;
-        }
-
         if (event.getEntity() instanceof Wolf) {
             Wolf wolf = (Wolf) event.getEntity();
+
+            if (wolf.getHealth() < 6) {
+                if (plugin.guardTeleportCount.get(wolf) > 0) {
+                    plugin.guardWaits.put(wolf, 12 * 20);
+                    wolf.teleport(plugin.guardPositions.get(wolf));
+                    wolf.setSitting(true);
+                    wolf.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 10 * 20, 2));
+                    plugin.guardTeleportCount.put(wolf, (plugin.guardTeleportCount.get(wolf) - 1));
+                }
+            }
+
+            if (plugin.targetDetermination) {
+                return;
+            }
             if (plugin.guards.contains(wolf) && !plugin.guardTargets.containsKey(wolf)) {
                 event.setCancelled(true);
             }
