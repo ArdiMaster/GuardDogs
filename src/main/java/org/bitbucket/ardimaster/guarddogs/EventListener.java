@@ -44,12 +44,14 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashSet;
+import java.util.Random;
 
 /**
  * The Bukkit event listening class for the GuardDogs plugin
  */
 public class EventListener implements Listener {
     protected GuardDogs plugin;
+    private Random random = new Random();
 
     public EventListener(GuardDogs plugin) {
         this.plugin = plugin;
@@ -210,6 +212,20 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
+        if (event.getDamager() instanceof Wolf) {
+            Wolf wolf = (Wolf) event.getDamager();
+
+            if (plugin.guards.contains(wolf)) {
+                event.setDamage(event.getDamage() + plugin.guardExtraDamage.get(wolf));
+
+                if (plugin.guardIgniteChance.get(wolf) > 0) {
+                    if (random.nextInt(10) < plugin.guardIgniteChance.get(wolf)) {
+                        event.getEntity().setFireTicks(20 * 3);
+                    }
+                }
+            }
+        }
+
         if (plugin.targetDetermination) {
             return;
         }
@@ -227,7 +243,6 @@ public class EventListener implements Listener {
         if (event.getEntity() instanceof Wolf) {
             Wolf wolf = (Wolf) event.getEntity();
             plugin.deadGuard(wolf);
-            plugin.guardPositions.remove(wolf);
         }
 
         LivingEntity deadEntity = event.getEntity();
@@ -236,6 +251,7 @@ public class EventListener implements Listener {
                 if (!plugin.guardTargets.containsKey(wolf)) {
                     continue;
                 }
+
                 if (plugin.guardTargets.get(wolf).equals(deadEntity)) {
                     plugin.guardWaits.put(wolf, 5 * 20);
                     wolf.setSitting(true);
