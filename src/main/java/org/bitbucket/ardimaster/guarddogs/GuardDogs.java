@@ -242,7 +242,6 @@ public class GuardDogs extends JavaPlugin {
             String id = wolf.getUniqueId().toString();
             Location loc = guardPositions.get(wolf);
             if (loc == null) {
-                log(Level.SEVERE, "Something is bad");
                 throw new AssertionError("Attempting to save a guard dog whose position is null! Something went " +
                         "terribly wrong here.");
             }
@@ -290,7 +289,7 @@ public class GuardDogs extends JavaPlugin {
         File configFile = new File(getDataFolder(), configFileName);
         if (!configFile.exists()) {
             if (Files.exists(new File(getDataFolder(), "guards.yml").toPath())) {
-                log(Level.INFO, "Found old guards.yml, renaming...");
+                log(Level.INFO, "Found ultra-old guards.yml, renaming...");
                 try {
                     Files.move(new File(getDataFolder(), "guards.yml").toPath(), new File(getDataFolder(),
                             configFileName).toPath(), StandardCopyOption.REPLACE_EXISTING);

@@ -202,7 +202,7 @@ public class EventListener implements Listener {
                 teleport++;
                 plugin.guardExtraDamage.put(wolf, teleport);
                 player.sendMessage(ChatColor.GREEN + "This " + ChatColor.DARK_GREEN + "Guard Dog" + ChatColor.GREEN +
-                        "can now teleport home  " + ChatColor.AQUA + teleport + ChatColor.GREEN +
+                        " can now teleport home " + ChatColor.AQUA + teleport + ChatColor.GREEN +
                         " times when low on health.");
             } else {
                 player.sendMessage(ChatColor.RED + "When low on health, this " + ChatColor.DARK_GREEN + "Guard Dog" +
