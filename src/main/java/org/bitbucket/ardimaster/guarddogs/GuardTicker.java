@@ -50,7 +50,7 @@ public class GuardTicker extends BukkitRunnable {
                 if (plugin.guardWaits.get(wolf) <= 0) {
                     plugin.guardWaits.remove(wolf);
                 } else {
-                    plugin.guardWaits.put(wolf, (plugin.guardWaits.get(wolf) - 5));
+                    plugin.guardWaits.put(wolf, (plugin.guardWaits.get(wolf) - 10));
                 }
             }
 
