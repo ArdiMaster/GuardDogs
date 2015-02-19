@@ -477,6 +477,43 @@ public class GuardDogs extends JavaPlugin {
         if (cmd.getName().equalsIgnoreCase("guarddogs")) {
             if (sender instanceof Player) {
                 if (!sender.hasPermission("guarddogs.admin")) {
+                    sender.sendMessage(ChatColor.RED + "Sorry, but you don't have permission to use this command.");
+                    return true;
+                }
+            }
+
+            if (args.length == 1) {
+                if (args[0].equalsIgnoreCase("version")) {
+                    if (getDescription().getVersion().equals(currentVersion)) {
+                        sender.sendMessage(ChatColor.GREEN + "You are using plugin " + ChatColor.DARK_GREEN +
+                                "Guard Dogs" + ChatColor.GREEN + ", version " + ChatColor.AQUA +
+                                getDescription().getVersion() + ChatColor.GREEN + ". No updates available.");
+                    } else if (currentVersion.equals("ERROR")) {
+                        sender.sendMessage(ChatColor.GREEN + "You are using plugin " + ChatColor.DARK_GREEN +
+                                "Guard Dogs" + ChatColor.GREEN + ", version " + ChatColor.AQUA +
+                                getDescription().getVersion() + ChatColor.GREEN + ". An " + ChatColor.RED + "Error" +
+                                ChatColor.GREEN + " occured while trying to check for updates, please check manually " +
+                                "at" + ChatColor.AQUA + "http://dev.bukkit.org/bukkit-plugins/guard-dogs");
+                    } else {
+                        sender.sendMessage(ChatColor.GREEN + "You are using plugin " + ChatColor.DARK_GREEN +
+                                "Guard Dogs" + ChatColor.GREEN + ", version " + ChatColor.AQUA +
+                                getDescription().getVersion() + ChatColor.GREEN + ". Version " + ChatColor.AQUA +
+                                currentVersion + ChatColor.GREEN + " is available! Grab it at " + ChatColor.AQUA +
+                                "http://dev.bukkit.org/bukkit-plugins/guard-dogs");
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+
+    // Currently working on replacement....
+    /* public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
+        if (cmd.getName().equalsIgnoreCase("guarddogs")) {
+            if (sender instanceof Player) {
+                if (!sender.hasPermission("guarddogs.admin")) {
                     sender.sendMessage(ChatColor.RED + "Sorry, but you don't have permission to edit guard dogs iems.");
                     return true;
                 }
@@ -534,5 +571,5 @@ public class GuardDogs extends JavaPlugin {
         }
 
         return false;
-    }
+    } */
 }
