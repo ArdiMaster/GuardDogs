@@ -482,26 +482,38 @@ public class GuardDogs extends JavaPlugin {
                 }
             }
 
-            if (args.length == 1) {
-                if (args[0].equalsIgnoreCase("version")) {
-                    if (getDescription().getVersion().equals(currentVersion)) {
-                        sender.sendMessage(ChatColor.GREEN + "You are using plugin " + ChatColor.DARK_GREEN +
-                                "Guard Dogs" + ChatColor.GREEN + ", version " + ChatColor.AQUA +
-                                getDescription().getVersion() + ChatColor.GREEN + ". No updates available.");
-                    } else if (currentVersion.equals("ERROR")) {
-                        sender.sendMessage(ChatColor.GREEN + "You are using plugin " + ChatColor.DARK_GREEN +
-                                "Guard Dogs" + ChatColor.GREEN + ", version " + ChatColor.AQUA +
-                                getDescription().getVersion() + ChatColor.GREEN + ". An " + ChatColor.RED + "Error" +
-                                ChatColor.GREEN + " occured while trying to check for updates, please check manually " +
-                                "at" + ChatColor.AQUA + "http://dev.bukkit.org/bukkit-plugins/guard-dogs");
-                    } else {
-                        sender.sendMessage(ChatColor.GREEN + "You are using plugin " + ChatColor.DARK_GREEN +
-                                "Guard Dogs" + ChatColor.GREEN + ", version " + ChatColor.AQUA +
-                                getDescription().getVersion() + ChatColor.GREEN + ". Version " + ChatColor.AQUA +
-                                currentVersion + ChatColor.GREEN + " is available! Grab it at " + ChatColor.AQUA +
-                                "http://dev.bukkit.org/bukkit-plugins/guard-dogs");
-                    }
+            if (args.length == 1 && args[0].equalsIgnoreCase("version")) {
+                if (getDescription().getVersion().equals(currentVersion)) {
+                    sender.sendMessage(ChatColor.GREEN + "You are using plugin " + ChatColor.DARK_GREEN +
+                            "Guard Dogs" + ChatColor.GREEN + ", version " + ChatColor.AQUA +
+                            getDescription().getVersion() + ChatColor.GREEN + ". No updates available.");
+                } else if (currentVersion.equals("ERROR")) {
+                    sender.sendMessage(ChatColor.GREEN + "You are using plugin " + ChatColor.DARK_GREEN +
+                            "Guard Dogs" + ChatColor.GREEN + ", version " + ChatColor.AQUA +
+                            getDescription().getVersion() + ChatColor.GREEN + ". An " + ChatColor.RED + "Error" +
+                            ChatColor.GREEN + " occured while trying to check for updates, please check manually " +
+                            "at" + ChatColor.AQUA + "http://dev.bukkit.org/bukkit-plugins/guard-dogs");
+                } else {
+                    sender.sendMessage(ChatColor.GREEN + "You are using plugin " + ChatColor.DARK_GREEN +
+                            "Guard Dogs" + ChatColor.GREEN + ", version " + ChatColor.AQUA +
+                            getDescription().getVersion() + ChatColor.GREEN + ". Version " + ChatColor.AQUA +
+                            currentVersion + ChatColor.GREEN + " is available! Grab it at " + ChatColor.AQUA +
+                            "http://dev.bukkit.org/bukkit-plugins/guard-dogs");
                 }
+            }
+
+            if (args.length == 0 || (args.length == 1 && args[0].equals("help"))) {
+                sender.sendMessage(ChatColor.RED + "/guarddogs version" + ChatColor.GOLD + " - displays version " +
+                        "information");
+                sender.sendMessage(ChatColor.RED + "/guarddogs materials [create|disable|ignore] [Material]" +
+                        ChatColor.GOLD + " - set the material required to perform the specified guard dog action");
+                sender.sendMessage(ChatColor.RED + "/guarddogs materials [extradamage|ignitechance|teleport] " +
+                        "[Material]" + ChatColor.GOLD + " - set the material required for the specified guard " +
+                        "dog special ability");
+                sender.sendMessage(ChatColor.RED + "/guarddogs [enable|disable] notifyupdates" + ChatColor.GOLD +
+                        " - enables or disables the on-join update alert for admins");
+                sender.sendMessage(ChatColor.RED + "/guarddogs [enable|disable] [extradamage|ignitechance|teleport]" +
+                        ChatColor.GOLD + " - enables or disables the specified guard dog special ability");
             }
         }
 
