@@ -500,21 +500,118 @@ public class GuardDogs extends JavaPlugin {
                             currentVersion + ChatColor.GREEN + " is available! Grab it at " + ChatColor.AQUA +
                             "http://dev.bukkit.org/bukkit-plugins/guard-dogs");
                 }
+
+                return true;
             }
 
             if (args.length == 0 || (args.length == 1 && args[0].equals("help"))) {
-                sender.sendMessage(ChatColor.RED + "/guarddogs version" + ChatColor.GOLD + " - displays version " +
-                        "information");
-                sender.sendMessage(ChatColor.RED + "/guarddogs materials [create|disable|ignore] [Material]" +
-                        ChatColor.GOLD + " - set the material required to perform the specified guard dog action");
-                sender.sendMessage(ChatColor.RED + "/guarddogs materials [extradamage|ignitechance|teleport] " +
-                        "[Material]" + ChatColor.GOLD + " - set the material required for the specified guard " +
-                        "dog special ability");
-                sender.sendMessage(ChatColor.RED + "/guarddogs [enable|disable] notifyupdates" + ChatColor.GOLD +
-                        " - enables or disables the on-join update alert for admins");
-                sender.sendMessage(ChatColor.RED + "/guarddogs [enable|disable] [extradamage|ignitechance|teleport]" +
-                        ChatColor.GOLD + " - enables or disables the specified guard dog special ability");
+                sendHelp(sender);
+                return true;
             }
+
+            if (args.length == 1) {
+                switch (args[0]) {
+                    case "materials":
+                        sender.sendMessage(ChatColor.RED + "/guarddogs materials [create|disable|ignore] [Material] " +
+                                ChatColor.GOLD + "- set the material required to perform the specified guard dog action");
+                        sender.sendMessage(ChatColor.RED + "/guarddogs materials [extradamage|ignitechance|teleport] " +
+                                "[Material]" + ChatColor.GOLD + "- set the material required for the specified guard " +
+                                "dog special ability");
+                        break;
+                    case "enable":
+                        sender.sendMessage(ChatColor.RED + "/guarddogs enable notifyupdates" + ChatColor.GOLD +
+                                " - enables the on-join update alert for admins");
+                        sender.sendMessage(ChatColor.RED + "/guarddogs enable [extradamage|ignitechance|teleport]" +
+                                ChatColor.GOLD + " - enables the specified guard dog special ability");
+                        break;
+                    case "disable":
+                        sender.sendMessage(ChatColor.RED + "/guarddogs disable notifyupdates" + ChatColor.GOLD +
+                                " - disables the on-join update alert for admins");
+                        sender.sendMessage(ChatColor.RED + "/guarddogs disable [extradamage|ignitechance|teleport]" +
+                                ChatColor.GOLD + " - disables the specified guard dog special ability");
+                        break;
+                    default:
+                        sendHelp(sender);
+                        break;
+                }
+                return true;
+            }
+
+            if (args.length == 2 && args[0].equals("enable")) {
+                switch (args[0]) {
+                    
+                }
+            }
+
+            if (args.length == 3 && args[0].equals("materials")) {
+                Material tmp = Material.getMaterial(args[2]);
+                switch (args[1]) {
+                    case "create":
+                        if (tmp != null) {
+                            createMat = tmp;
+                            sender.sendMessage(ChatColor.GREEN + "Material changed. From now on, right click a tamed" +
+                                    "wolf with " + ChatColor.AQUA + args[2] + ChatColor.GREEN + " to make it a guard dog.");
+                        } else {
+                            sender.sendMessage(ChatColor.RED + args[2] + " is not a valid material!");
+                        }
+                        break;
+                    case "disable":
+                        if (tmp != null) {
+                            disableMat = tmp;
+                            sender.sendMessage(ChatColor.GREEN + "Material changed. From now on, right click a guard " +
+                                    "dog with " + ChatColor.AQUA + args[2] + ChatColor.GREEN + " to disable it.");
+                        } else {
+                            sender.sendMessage(ChatColor.RED + args[2] + " is not a valid material!");
+                        }
+                        break;
+                    case "ignore":
+                        if (tmp != null) {
+                            ignoreMat = tmp;
+                            sender.sendMessage(ChatColor.GREEN + "Material changed. From now on, right click a guard " +
+                                    "dog with " + ChatColor.AQUA + args[2] + ChatColor.GREEN + " to make it ignore " +
+                                    "a player.");
+                        } else {
+                            sender.sendMessage(ChatColor.RED + args[2] + " is not a valid material!");
+                        }
+                        break;
+                    case "extradamage":
+                        if (tmp != null) {
+                            extraDamageMat = tmp;
+                            sender.sendMessage(ChatColor.GREEN + "Material changed. From now on, right click a guard " +
+                                    "dog with " + ChatColor.AQUA + args[2] + ChatColor.GREEN + " to make it deal " +
+                                    "extra damage.");
+                        } else {
+                            sender.sendMessage(ChatColor.RED + args[2] + " is not a valid material!");
+                        }
+                        break;
+                    case "ignitechance":
+                        if (tmp != null) {
+                            igniteChanceMat = tmp;
+                            sender.sendMessage(ChatColor.GREEN + "Material changed. From now on, right click a guard " +
+                                    "dog with " + ChatColor.AQUA + args[2] + ChatColor.GREEN + " to increase it's " +
+                                    "chance to ignote it's enemies.");
+                        } else {
+                            sender.sendMessage(ChatColor.RED + args[2] + "is not a valid material!");
+                        }
+                        break;
+                    case "teleport":
+                        if (tmp != null) {
+                            teleportMat = tmp;
+                            sender.sendMessage(ChatColor.GREEN + "Material changed. From now on, right click a guard " +
+                                    "dog with " + ChatColor.AQUA + args[2] + ChatColor.GREEN + " to allow it to " +
+                                    "teleport to it's home location when it's low on health.");
+                        }
+                    default:
+                        sender.sendMessage(ChatColor.RED + "/guarddogs materials [create|disable|ignore] [Material] " +
+                                ChatColor.GOLD + "- set the material required to perform the specified guard dog action");
+                        sender.sendMessage(ChatColor.RED + "/guarddogs materials [extradamage|ignitechance|teleport] " +
+                                "[Material]" + ChatColor.GOLD + "- set the material required for the specified guard " +
+                                "dog special ability");
+                        break;
+                }
+                return true;
+            }
+
         }
 
         return false;
@@ -584,4 +681,18 @@ public class GuardDogs extends JavaPlugin {
 
         return false;
     } */
+
+    private void sendHelp(CommandSender sender) {
+        sender.sendMessage(ChatColor.RED + "/guarddogs version" + ChatColor.GOLD + " - displays version " +
+                "information");
+        sender.sendMessage(ChatColor.RED + "/guarddogs materials [create|disable|ignore] [Material]" +
+                ChatColor.GOLD + " - set the material required to perform the specified guard dog action");
+        sender.sendMessage(ChatColor.RED + "/guarddogs materials [extradamage|ignitechance|teleport] " +
+                "[Material]" + ChatColor.GOLD + " - set the material required for the specified guard " +
+                "dog special ability");
+        sender.sendMessage(ChatColor.RED + "/guarddogs [enable|disable] notifyupdates" + ChatColor.GOLD +
+                " - enables or disables the on-join update alert for admins");
+        sender.sendMessage(ChatColor.RED + "/guarddogs [enable|disable] [extradamage|ignitechance|teleport]" +
+                ChatColor.GOLD + " - enables or disables the specified guard dog special ability");
+    }
 }
