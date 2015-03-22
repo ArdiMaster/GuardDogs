@@ -38,6 +38,20 @@
     <artifactId>GuardDogs</artifactId>
     <version>0.7-SNAPSHOT</version>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.2</version>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
     <repositories>
         <!-- Bukkit can be found at the following repository -->
         <repository>

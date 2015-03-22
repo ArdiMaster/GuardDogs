@@ -266,7 +266,7 @@ public class GuardDogs extends JavaPlugin {
         config.set("id.create", createMat.toString());
         config.set("id.disable", disableMat.toString());
         config.set("id.ignore", ignoreMat.toString());
-        config.set("id.extaDamage", extraDamageMat.toString());
+        config.set("id.extraDamage", extraDamageMat.toString());
         config.set("id.igniteChance", igniteChanceMat.toString());
         config.set("id.teleport", teleportMat.toString());
         config.set("special.extraDamage", extraDamage);
@@ -538,8 +538,62 @@ public class GuardDogs extends JavaPlugin {
             }
 
             if (args.length == 2 && args[0].equals("enable")) {
-                switch (args[0]) {
-                    
+                switch (args[1]) {
+                    case "extradamage":
+                        extraDamage = true;
+                        sender.sendMessage(ChatColor.DARK_GREEN + "Guard Dog" + ChatColor.GREEN + "s can now deal " +
+                                "extra damage.");
+                        break;
+                    case "ignitechance":
+                        igniteChance = true;
+                        sender.sendMessage(ChatColor.DARK_GREEN + "Guard Dog" + ChatColor.GREEN + "s can now have a" +
+                                "chance to ignite their targets upon attack.");
+                        break;
+                    case "teleport":
+                        teleport = true;
+                        sender.sendMessage(ChatColor.DARK_GREEN + "Gaurd Dog" + ChatColor.GREEN + "s can now teleport" +
+                                "home when they are low on health");
+                        break;
+                    case "notifyupdates":
+                        notifyUpdates = true;
+                        sender.sendMessage(ChatColor.GREEN + "Admins will now be notified about available updates " +
+                                "on join.");
+                        break;
+                    default:
+                        sender.sendMessage(ChatColor.RED + "/guarddogs enable notifyupdates" + ChatColor.GOLD +
+                                " - enables the on-join update alert for admins");
+                        sender.sendMessage(ChatColor.RED + "/guarddogs enable [extradamage|ignitechance|teleport]" +
+                                ChatColor.GOLD + " - enables the specified guard dog special ability");
+                }
+            }
+
+            if (args.length == 2 && args[0].equals("disable")) {
+                switch (args[1]) {
+                    case "extradamage":
+                        extraDamage = false;
+                        sender.sendMessage(ChatColor.DARK_GREEN + "Guard Dog" + ChatColor.GREEN + "s can no longer " +
+                                "deal extra damage.");
+                        break;
+                    case "ignitechance":
+                        igniteChance = false;
+                        sender.sendMessage(ChatColor.DARK_GREEN + "Guard Dog" + ChatColor.GREEN + "s can no longer " +
+                                "have a chance to ignite their targets upon attack.");
+                        break;
+                    case "teleport":
+                        teleport = false;
+                        sender.sendMessage(ChatColor.DARK_GREEN + "Gaurd Dog" + ChatColor.GREEN + "s can now teleport" +
+                                "home when they are low on health");
+                        break;
+                    case "notifyupdates":
+                        notifyUpdates = false;
+                        sender.sendMessage(ChatColor.GREEN + "Admins will now be notified about available updates " +
+                                "on join.");
+                        break;
+                    default:
+                        sender.sendMessage(ChatColor.RED + "/guarddogs disable notifyupdates" + ChatColor.GOLD +
+                                " - enables the on-join update alert for admins");
+                        sender.sendMessage(ChatColor.RED + "/guarddogs disable [extradamage|ignitechance|teleport]" +
+                                ChatColor.GOLD + " - disable the specified guard dog special ability");
                 }
             }
 
@@ -549,7 +603,7 @@ public class GuardDogs extends JavaPlugin {
                     case "create":
                         if (tmp != null) {
                             createMat = tmp;
-                            sender.sendMessage(ChatColor.GREEN + "Material changed. From now on, right click a tamed" +
+                            sender.sendMessage(ChatColor.GREEN + "Material changed. From now on, right click a tamed " +
                                     "wolf with " + ChatColor.AQUA + args[2] + ChatColor.GREEN + " to make it a guard dog.");
                         } else {
                             sender.sendMessage(ChatColor.RED + args[2] + " is not a valid material!");
