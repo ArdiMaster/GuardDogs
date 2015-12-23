@@ -642,8 +642,8 @@ public class GuardDogs extends JavaPlugin {
                         if (tmp != null) {
                             igniteChanceMat = tmp;
                             sender.sendMessage(ChatColor.GREEN + "Material changed. From now on, right click a guard " +
-                                    "dog with " + ChatColor.AQUA + args[2] + ChatColor.GREEN + " to increase it's " +
-                                    "chance to ignote it's enemies.");
+                                    "dog with " + ChatColor.AQUA + args[2] + ChatColor.GREEN + " to increase its " +
+                                    "chance of ignote its enemies.");
                         } else {
                             sender.sendMessage(ChatColor.RED + args[2] + "is not a valid material!");
                         }
