@@ -115,7 +115,7 @@ public class EventListener implements Listener {
                         "cancelling old process...");
             }
 
-            player.sendMessage(ChatColor.MAGIC + "M" + ChatColor.RESET + ChatColor.DARK_AQUA + "Type the name of the " +
+            player.sendMessage(ChatColor.MAGIC + "M" + ChatColor.RESET + ChatColor.DARK_AQUA + " Type the name of the " +
                     "player you wish to have this guard dog ignore.");
 
             plugin.settingIgnore.put(player, wolf);
@@ -293,6 +293,7 @@ public class EventListener implements Listener {
 
         if (!plugin.getServer().getPlayer(event.getMessage()).isOnline()) {
             player.sendMessage(ChatColor.RED + "This player is not online.");
+            event.setCancelled(true);
             return;
         }
         if (plugin.guardIgnores.containsKey(wolf)) {
