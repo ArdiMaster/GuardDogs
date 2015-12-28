@@ -278,6 +278,7 @@ public class EventListener implements Listener {
     }
 
     @EventHandler
+    @SuppressWarnings("deprecation")
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         if (!plugin.settingIgnore.containsKey(event.getPlayer())) {
             return;
