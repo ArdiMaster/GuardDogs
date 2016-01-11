@@ -34,9 +34,6 @@ import org.bukkit.entity.Wolf;
 import org.bukkit.scheduler.BukkitRunnable;
 
 /**
- * Class containing the repeating Bukkit task to reseat guard dogs which are standing without a target, also contains
- * the timer for GuardDogs.guardWaits
- *
  * @author ArdiMaster
  */
 public class GuardTicker extends BukkitRunnable {
@@ -53,15 +50,17 @@ public class GuardTicker extends BukkitRunnable {
                 if (plugin.guardWaits.get(wolf) <= 0) {
                     plugin.guardWaits.remove(wolf);
                 } else {
-                    plugin.guardWaits.put(wolf, (plugin.guardWaits.get(wolf) - 5));
+                    plugin.guardWaits.put(wolf, (plugin.guardWaits.get(wolf) - 10));
                 }
             }
 
-            if (!plugin.guardTargets.containsKey(wolf) && !wolf.isSitting()) {
-                plugin.guardWaits.put(wolf, 20);
-                wolf.teleport(plugin.guardPositions.get(wolf));
-                wolf.setSitting(true);
+            if (plugin.guardTargets.containsKey(wolf) || wolf.isSitting()) {
+                continue;
             }
+
+            plugin.guardWaits.put(wolf, 20);
+            wolf.teleport(plugin.guardPositions.get(wolf));
+            wolf.setSitting(true);
         }
     }
 }

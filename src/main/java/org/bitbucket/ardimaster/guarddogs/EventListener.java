@@ -31,7 +31,6 @@
 package org.bitbucket.ardimaster.guarddogs;
 
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
@@ -43,24 +42,23 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.HashSet;
+import java.util.Random;
 
 /**
  * The Bukkit event listening class for the GuardDogs plugin
  */
 public class EventListener implements Listener {
     protected GuardDogs plugin;
+    private Random random = new Random();
 
     public EventListener(GuardDogs plugin) {
         this.plugin = plugin;
     }
 
-    /**
-     * Invoked by the server when a player right-clicks an entity
-     *
-     * @param event The triggered event
-     */
     @EventHandler
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
         if (!(event.getRightClicked() instanceof Wolf)) {
@@ -81,7 +79,7 @@ public class EventListener implements Listener {
                 return;
             }
 
-            if (plugin.createGuard(wolf)) {
+            if (plugin.createGuard(wolf, 0, 0, 0)) {
                 player.getInventory().removeItem(new ItemStack(plugin.createMat, 1));
                 player.sendMessage(ChatColor.DARK_GREEN + "Guard dog" + ChatColor.GREEN + " ready for action");
             } else {
@@ -95,7 +93,7 @@ public class EventListener implements Listener {
                 return;
             }
 
-            if (plugin.removeGuard(wolf, player)) {
+            if (plugin.removeGuard(wolf)) {
                 player.sendMessage(ChatColor.DARK_GREEN + "Guard dog " + ChatColor.AQUA + "disabled.");
             } else {
                 player.sendMessage(ChatColor.RED + "This isn't a guard dog, it's just a normal dog!");
@@ -117,46 +115,149 @@ public class EventListener implements Listener {
                         "cancelling old process...");
             }
 
-            player.sendMessage(ChatColor.MAGIC + "M" + ChatColor.RESET + ChatColor.DARK_AQUA + "Type the name of the " +
+            player.sendMessage(ChatColor.MAGIC + "M" + ChatColor.RESET + ChatColor.DARK_AQUA + " Type the name of the " +
                     "player you wish to have this guard dog ignore.");
 
             plugin.settingIgnore.put(player, wolf);
+        } else if (player.getItemInHand().getType().equals(plugin.extraDamageMat)) {
+            if (!wolf.isTamed() || !wolf.getOwner().equals(player)) {
+                player.sendMessage(ChatColor.RED + "This isn't your dog. Thus, it can't be your guard dog. " +
+                        "Thus, you can't have it deal extra damage.");
+                return;
+            }
+
+            if (!plugin.guards.contains(wolf)) {
+                player.sendMessage(ChatColor.RED + "This isn't a guard dog. Thus, you can't have it " +
+                        "deal extra damage.");
+                return;
+            }
+
+            if (!plugin.extraDamage) {
+                player.sendMessage(ChatColor.RED + "Guard dogs extra damage is disabled on this server!");
+                return;
+            }
+
+            int damage = plugin.guardExtraDamage.get(wolf);
+            if (damage < 2) {
+                player.getInventory().remove(new ItemStack(plugin.extraDamageMat, 1));
+                damage++;
+                plugin.guardExtraDamage.put(wolf, damage);
+                player.sendMessage(ChatColor.GREEN + "This " + ChatColor.DARK_GREEN + "Guard Dog" + ChatColor.GREEN +
+                        "'s extra damage is now " + ChatColor.AQUA + damage + ChatColor.GREEN + " half-hearts");
+            } else {
+                // TODO: Make maximum amount of extra damage configurable
+                player.sendMessage(ChatColor.RED + "This " + ChatColor.DARK_GREEN + "Guard Dog" + ChatColor.RED +
+                        "'s extra damage is already at maximum!");
+            }
+        } else if (player.getItemInHand().getType().equals(plugin.igniteChanceMat)) {
+            if (!wolf.isTamed() || !wolf.getOwner().equals(player)) {
+                player.sendMessage(ChatColor.RED + "This isn't your dog. Thus, it can't be your guard dog. " +
+                        "Thus, you can't have it ignite its enemies.");
+                return;
+            }
+
+            if (!plugin.guards.contains(wolf)) {
+                player.sendMessage(ChatColor.RED + "This isn't a guard dog. Thus, you can't have it " +
+                        "ignite its enemies.");
+                return;
+            }
+
+            if (!plugin.extraDamage) {
+                player.sendMessage(ChatColor.RED + "Guard dogs igniting their enemies is disabled on this server!");
+                return;
+            }
+
+            int chance = plugin.guardIgniteChance.get(wolf);
+            if (chance < 6) {
+                player.getInventory().remove(new ItemStack(plugin.igniteChanceMat, 1));
+                chance++;
+                plugin.guardExtraDamage.put(wolf, chance);
+                player.sendMessage(ChatColor.GREEN + "This " + ChatColor.DARK_GREEN + "Guard Dog" + ChatColor.GREEN +
+                        "'s chance to ignite its enemy is now " + ChatColor.AQUA + chance + ChatColor.GREEN + " %");
+            } else {
+                // TODO: Make maximum chance configurable
+                player.sendMessage(ChatColor.RED + "This " + ChatColor.DARK_GREEN + "Guard Dog" + ChatColor.RED +
+                        "'s chance to ignite its enemies is already at maximum!");
+            }
+        } else if (player.getItemInHand().getType().equals(plugin.teleportMat)) {
+            if (!wolf.isTamed() || !wolf.getOwner().equals(player)) {
+                player.sendMessage(ChatColor.RED + "This isn't your dog. Thus, it can't be your guard dog. " +
+                        "Thus, you can't have it teleport home when it's low on health.");
+                return;
+            }
+
+            if (!plugin.guards.contains(wolf)) {
+                player.sendMessage(ChatColor.RED + "This isn't a guard dog. Thus, you can't have it " +
+                        "teleport home when it's low on health.");
+                return;
+            }
+
+            if (!plugin.extraDamage) {
+                player.sendMessage(ChatColor.RED + "Guard dogs teleporting home when low on health is disabled " +
+                        "on this server!");
+                return;
+            }
+
+            int teleport = plugin.guardTeleportCount.get(wolf);
+            if (teleport < 16) {
+                player.getInventory().remove(new ItemStack(plugin.teleportMat, 1));
+                teleport++;
+                plugin.guardExtraDamage.put(wolf, teleport);
+                player.sendMessage(ChatColor.GREEN + "This " + ChatColor.DARK_GREEN + "Guard Dog" + ChatColor.GREEN +
+                        " can now teleport home " + ChatColor.AQUA + teleport + ChatColor.GREEN +
+                        " times when low on health.");
+            } else {
+                // TODO: Make teleport count configurable
+                player.sendMessage(ChatColor.RED + "When low on health, this " + ChatColor.DARK_GREEN + "Guard Dog" +
+                        ChatColor.RED + " can already teleport home the maximum amount of times!");
+            }
         }
 
     }
 
-    /**
-     * Invoked by the server ven an entity gets damaged by entity
-     *
-     * @param event The event
-     */
     @EventHandler
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
-        if (plugin.targetDetermination) {
-            return;
+        if (event.getDamager() instanceof Wolf) {
+            Wolf wolf = (Wolf) event.getDamager();
+
+            if (plugin.guards.contains(wolf)) {
+                event.setDamage(event.getDamage() + plugin.guardExtraDamage.get(wolf));
+
+                if (plugin.guardIgniteChance.get(wolf) > 0) {
+                    if (random.nextInt(10) < plugin.guardIgniteChance.get(wolf)) {
+                        event.getEntity().setFireTicks(20 * 3);
+                    }
+                }
+            }
         }
 
         if (event.getEntity() instanceof Wolf) {
-            Entity e = event.getEntity();
-            if (plugin.guards.contains(e)) {
-                if (!plugin.guardTargets.containsKey(e)) {
-                    event.setCancelled(true);
+            Wolf wolf = (Wolf) event.getEntity();
+
+            if (wolf.getHealth() < 6) {
+                if (plugin.guardTeleportCount.get(wolf) > 0) {
+                    plugin.guardWaits.put(wolf, 12 * 20);
+                    wolf.teleport(plugin.guardPositions.get(wolf));
+                    wolf.setSitting(true);
+                    wolf.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 10 * 20, 2));
+                    plugin.guardTeleportCount.put(wolf, (plugin.guardTeleportCount.get(wolf) - 1));
                 }
+            }
+
+            if (plugin.targetDetermination) {
+                return;
+            }
+            if (plugin.guards.contains(wolf) && !plugin.guardTargets.containsKey(wolf)) {
+                event.setCancelled(true);
             }
         }
     }
 
-    /**
-     * Invoked when an entity dies
-     *
-     * @param event The event
-     */
     @EventHandler
     public void onEntityDeath(EntityDeathEvent event) {
         if (event.getEntity() instanceof Wolf) {
             Wolf wolf = (Wolf) event.getEntity();
             plugin.deadGuard(wolf);
-            plugin.guardPositions.remove(wolf);
         }
 
         LivingEntity deadEntity = event.getEntity();
@@ -165,6 +266,7 @@ public class EventListener implements Listener {
                 if (!plugin.guardTargets.containsKey(wolf)) {
                     continue;
                 }
+
                 if (plugin.guardTargets.get(wolf).equals(deadEntity)) {
                     plugin.guardWaits.put(wolf, 5 * 20);
                     wolf.setSitting(true);
@@ -175,12 +277,8 @@ public class EventListener implements Listener {
         }
     }
 
-    /**
-     * Invoked when a player chats
-     *
-     * @param event The event
-     */
     @EventHandler
+    @SuppressWarnings("deprecation")
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         if (!plugin.settingIgnore.containsKey(event.getPlayer())) {
             return;
@@ -199,6 +297,7 @@ public class EventListener implements Listener {
 
         if (!plugin.getServer().getPlayer(event.getMessage()).isOnline()) {
             player.sendMessage(ChatColor.RED + "This player is not online.");
+            event.setCancelled(true);
             return;
         }
         if (plugin.guardIgnores.containsKey(wolf)) {
@@ -214,23 +313,17 @@ public class EventListener implements Listener {
         player.sendMessage(ChatColor.DARK_GREEN + event.getMessage() + ChatColor.GREEN + " successfully added.");
     }
 
-    /**
-     * Invoked when a player joins the game.
-     *
-     * @param event The event
-     */
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        if (plugin.currentVersion.equals("ERROR") || plugin.currentVersion.equals(plugin.getDescription().getVersion())) {
+        if (plugin.currentVersion.equals("ERROR") ||
+                plugin.currentVersion.equals(plugin.getDescription().getVersion()) ||
+                !event.getPlayer().hasPermission("guarddogs.admin") ||
+                !plugin.notifyUpdates) {
             return;
         }
 
-        if (!event.getPlayer().hasPermission("guarddogs.admin")) {
-            return;
-        }
-
-        event.getPlayer().sendMessage(ChatColor.AQUA + "Version " + ChatColor.GREEN + plugin.currentVersion + " of plugin " +
-                ChatColor.DARK_GREEN + "Guard Dogs" + ChatColor.AQUA + " is available! " + ChatColor.DARK_AQUA +
-                "Grab it at http://dev.bukkit.org/bukkit-plugins/guard-dogs");
+        event.getPlayer().sendMessage(ChatColor.AQUA + "Version " + ChatColor.GREEN + plugin.currentVersion +
+                " of plugin " + ChatColor.DARK_GREEN + "Guard Dogs" + ChatColor.AQUA + " is available! " +
+                ChatColor.DARK_AQUA + "Grab it at http://dev.bukkit.org/bukkit-plugins/guard-dogs");
     }
 }

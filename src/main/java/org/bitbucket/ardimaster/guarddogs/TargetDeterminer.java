@@ -38,8 +38,6 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * This class contains the repeating Bukkit task to determine targets for the guard dogs.
- *
  * @author ArdiMaster
  */
 public class TargetDeterminer extends BukkitRunnable {
@@ -72,10 +70,7 @@ public class TargetDeterminer extends BukkitRunnable {
                     }
 
                     if (e instanceof Wolf) {
-                        if (plugin.guards.contains(e)) {
-                            continue;
-                        }
-                        if (wolf.getOwner().equals(((Wolf) e).getOwner())) {
+                        if (plugin.guards.contains(e) || wolf.getOwner().equals(((Wolf) e).getOwner())) {
                             continue;
                         }
                     }

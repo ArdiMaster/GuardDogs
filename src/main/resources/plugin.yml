@@ -1,11 +1,11 @@
 name: GuardDogs
-version: 0.6.5
+version: 0.7
 main: org.bitbucket.ardimaster.guarddogs.GuardDogs
 author: ArdiMaster
 
 commands:
   guarddogs:
-    usage: /guarddogs [create|disable|ignore] [Material]
+    usage: /guarddogs help
 
 permissions:
   guarddogs.admin:
