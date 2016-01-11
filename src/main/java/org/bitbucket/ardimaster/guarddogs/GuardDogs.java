@@ -69,6 +69,7 @@ public class GuardDogs extends JavaPlugin {
     protected Material createMat, disableMat, ignoreMat, extraDamageMat, igniteChanceMat, teleportMat = null;
     protected String currentVersion = "ERROR";
     protected boolean notifyUpdates, extraDamage, igniteChance, teleport;
+    protected int extraDamageMax, igniteChanceMax, teleportMax;
     private BukkitTask targetDeterminer;
     private BukkitTask guardTicker;
     private Metrics metrics;
@@ -310,6 +311,9 @@ public class GuardDogs extends JavaPlugin {
                     extraDamage = true;
                     igniteChance = true;
                     teleport = true;
+                    extraDamageMax = 2;
+                    igniteChanceMax = 6;
+                    teleportMax = 16;
 
                     notifyUpdates = true;
                     return;
@@ -328,6 +332,9 @@ public class GuardDogs extends JavaPlugin {
                 extraDamage = true;
                 igniteChance = true;
                 teleport = true;
+                extraDamageMax = 2;
+                igniteChanceMax = 6;
+                teleportMax = 16;
 
                 notifyUpdates = true;
                 return;
@@ -363,6 +370,9 @@ public class GuardDogs extends JavaPlugin {
                 extraDamage = true;
                 igniteChance = true;
                 teleport = true;
+                extraDamageMax = 2;
+                igniteChanceMax = 6;
+                teleportMax = 16;
 
                 notifyUpdates = true;
                 break;
@@ -379,6 +389,9 @@ public class GuardDogs extends JavaPlugin {
                 extraDamage = true;
                 igniteChance = true;
                 teleport = true;
+                extraDamageMax = 2;
+                igniteChanceMax = 6;
+                teleportMax = 16;
 
                 notifyUpdates = true;
                 break;
@@ -394,6 +407,9 @@ public class GuardDogs extends JavaPlugin {
                 extraDamage = config.getBoolean("special.extraDamage");
                 igniteChance = config.getBoolean("special.igniteChance");
                 teleport = config.getBoolean("special.teleport");
+                extraDamageMax = config.getInt("special.extraDamageMax");
+                igniteChanceMax = config.getInt("special.igniteChanceMax");
+                teleportMax = config.getInt("special.teleportMax");
 
                 notifyUpdates = config.getBoolean("notifyUpdates");
                 break;
