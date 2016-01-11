@@ -152,13 +152,13 @@ public class EventListener implements Listener {
         } else if (player.getItemInHand().getType().equals(plugin.igniteChanceMat)) {
             if (!wolf.isTamed() || !wolf.getOwner().equals(player)) {
                 player.sendMessage(ChatColor.RED + "This isn't your dog. Thus, it can't be your guard dog. " +
-                        "Thus, you can't have it ignite it's enemies.");
+                        "Thus, you can't have it ignite its enemies.");
                 return;
             }
 
             if (!plugin.guards.contains(wolf)) {
                 player.sendMessage(ChatColor.RED + "This isn't a guard dog. Thus, you can't have it " +
-                        "ignite it's enemies.");
+                        "ignite its enemies.");
                 return;
             }
 
@@ -173,11 +173,11 @@ public class EventListener implements Listener {
                 chance++;
                 plugin.guardExtraDamage.put(wolf, chance);
                 player.sendMessage(ChatColor.GREEN + "This " + ChatColor.DARK_GREEN + "Guard Dog" + ChatColor.GREEN +
-                        "'s chance to ignite it's enemy is now " + ChatColor.AQUA + chance + ChatColor.GREEN + " %");
+                        "'s chance to ignite its enemy is now " + ChatColor.AQUA + chance + ChatColor.GREEN + " %");
             } else {
                 // TODO: Make maximum chance configurable
                 player.sendMessage(ChatColor.RED + "This " + ChatColor.DARK_GREEN + "Guard Dog" + ChatColor.RED +
-                        "'s chance to ignite it's enemies is already at maximum!");
+                        "'s chance to ignite its enemies is already at maximum!");
             }
         } else if (player.getItemInHand().getType().equals(plugin.teleportMat)) {
             if (!wolf.isTamed() || !wolf.getOwner().equals(player)) {
