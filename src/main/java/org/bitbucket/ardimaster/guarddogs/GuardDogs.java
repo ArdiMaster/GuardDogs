@@ -661,7 +661,7 @@ public class GuardDogs extends JavaPlugin {
                                     "dog with " + ChatColor.AQUA + args[2] + ChatColor.GREEN + " to increase its " +
                                     "chance of ignote its enemies.");
                         } else {
-                            sender.sendMessage(ChatColor.RED + args[2] + "is not a valid material!");
+                            sender.sendMessage(ChatColor.RED + args[2] + " is not a valid material!");
                         }
                         break;
                     case "teleport":
@@ -669,8 +669,11 @@ public class GuardDogs extends JavaPlugin {
                             teleportMat = tmp;
                             sender.sendMessage(ChatColor.GREEN + "Material changed. From now on, right click a guard " +
                                     "dog with " + ChatColor.AQUA + args[2] + ChatColor.GREEN + " to allow it to " +
-                                    "teleport to it's home location when it's low on health.");
+                                    "teleport to its home location when it's low on health.");
+                        } else {
+                            sender.sendMessage(ChatColor.RED + args[2] + " is not a valid material");
                         }
+                        break;
                     default:
                         sender.sendMessage(ChatColor.RED + "/guarddogs materials [create|disable|ignore] [Material] " +
                                 ChatColor.GOLD + "- set the material required to perform the specified guard dog action");
@@ -682,6 +685,45 @@ public class GuardDogs extends JavaPlugin {
                 return true;
             }
 
+            if (args.length == 3 && args[0].equalsIgnoreCase("max")) {
+                switch (args[1]) {
+                    case "extradamage":
+                        extraDamageMax = Integer.parseInt(args[2]);
+                        sender.sendMessage(ChatColor.GREEN + "Guard Dogs on this server will from now on be able to " +
+                                "deal up to " + args[2] + " extra damage. Existing higher values have not been reset.");
+                        break;
+                    case "ignitechance":
+                        if (Integer.parseInt(args[2]) <= 10) {
+                            igniteChanceMax = Integer.parseInt(args[2]);
+                            sender.sendMessage(ChatColor.GREEN + "Guard Dogs on this server will from now on be able to " +
+                                    "have a maximum chance of " + args[2] + "0% to set their enemies on fire. Existing " +
+                                    "higher values have not been reset.");
+                        } else {
+                            sender.sendMessage(ChatColor.DARK_AQUA  + "ignitechance" + ChatColor.RED + " is counted " +
+                                    "in setps of 10%, so 10 (100%) is maximum.");
+                        }
+                        break;
+                    case "teleport":
+                        teleportMax = Integer.parseInt(args[2]);
+                        sender.sendMessage(ChatColor.GREEN + "Guard Dogs on this server will from now on be able to " +
+                                "teleport home when lowon health for up to " + args[2] + " times. Existing higher " +
+                                "values have not been reset.");
+                        break;
+                    default:
+                        sender.sendMessage(ChatColor.RED + "/guarddogs max [extradamage|ignitechance|teleport] " +
+                                "[maximum]" + ChatColor.GOLD + " - set the maximum for the specified guard dog action.");
+                        sender.sendMessage(ChatColor.DARK_AQUA + "extradamage" + ChatColor.GOLD + " - sets the " +
+                                "maximum amount of extra damage a guard dog can deal. Counted if half-hearts.");
+                        sender.sendMessage(ChatColor.DARK_AQUA + "ignitechance" + ChatColor.GOLD + " - sets the " +
+                                "maximum chance of setting an enemy on fire that a guard dog can have. Counted in " +
+                                "10%, maximum is 10 (100%).");
+                        sender.sendMessage(ChatColor.DARK_AQUA + "teleport" + ChatColor.GOLD + " - sets the maximum " +
+                                "amount of times a guard dog can teleport home when low on health.");
+                        break;
+                }
+
+                return true;
+            }
         }
 
         return false;
@@ -764,5 +806,7 @@ public class GuardDogs extends JavaPlugin {
                 " - enables or disables the on-join update alert for admins");
         sender.sendMessage(ChatColor.RED + "/guarddogs [enable|disable] [extradamage|ignitechance|teleport]" +
                 ChatColor.GOLD + " - enables or disables the specified guard dog special ability");
+        sender.sendMessage(ChatColor.RED + "/guarddogs max [extradamage|ignitechance|teleport] [maximum]" +
+                ChatColor.GOLD + " - sets the maximum for the specified guard dog special ability.");
     }
 }
