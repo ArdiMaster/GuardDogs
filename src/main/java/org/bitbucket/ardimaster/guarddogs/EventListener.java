@@ -138,14 +138,13 @@ public class EventListener implements Listener {
             }
 
             int damage = plugin.guardExtraDamage.get(wolf);
-            if (damage < 2) {
+            if (damage < plugin.extraDamageMax) {
                 player.getInventory().remove(new ItemStack(plugin.extraDamageMat, 1));
                 damage++;
                 plugin.guardExtraDamage.put(wolf, damage);
                 player.sendMessage(ChatColor.GREEN + "This " + ChatColor.DARK_GREEN + "Guard Dog" + ChatColor.GREEN +
                         "'s extra damage is now " + ChatColor.AQUA + damage + ChatColor.GREEN + " half-hearts");
             } else {
-                // TODO: Make maximum amount of extra damage configurable
                 player.sendMessage(ChatColor.RED + "This " + ChatColor.DARK_GREEN + "Guard Dog" + ChatColor.RED +
                         "'s extra damage is already at maximum!");
             }
@@ -168,14 +167,13 @@ public class EventListener implements Listener {
             }
 
             int chance = plugin.guardIgniteChance.get(wolf);
-            if (chance < 6) {
+            if (chance < plugin.igniteChanceMax) {
                 player.getInventory().remove(new ItemStack(plugin.igniteChanceMat, 1));
                 chance++;
                 plugin.guardExtraDamage.put(wolf, chance);
                 player.sendMessage(ChatColor.GREEN + "This " + ChatColor.DARK_GREEN + "Guard Dog" + ChatColor.GREEN +
                         "'s chance to ignite its enemy is now " + ChatColor.AQUA + chance + ChatColor.GREEN + " %");
             } else {
-                // TODO: Make maximum chance configurable
                 player.sendMessage(ChatColor.RED + "This " + ChatColor.DARK_GREEN + "Guard Dog" + ChatColor.RED +
                         "'s chance to ignite its enemies is already at maximum!");
             }
@@ -199,7 +197,7 @@ public class EventListener implements Listener {
             }
 
             int teleport = plugin.guardTeleportCount.get(wolf);
-            if (teleport < 16) {
+            if (teleport < plugin.teleportMax) {
                 player.getInventory().remove(new ItemStack(plugin.teleportMat, 1));
                 teleport++;
                 plugin.guardExtraDamage.put(wolf, teleport);
@@ -207,7 +205,6 @@ public class EventListener implements Listener {
                         " can now teleport home " + ChatColor.AQUA + teleport + ChatColor.GREEN +
                         " times when low on health.");
             } else {
-                // TODO: Make teleport count configurable
                 player.sendMessage(ChatColor.RED + "When low on health, this " + ChatColor.DARK_GREEN + "Guard Dog" +
                         ChatColor.RED + " can already teleport home the maximum amount of times!");
             }

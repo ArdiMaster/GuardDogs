@@ -69,6 +69,7 @@ public class GuardDogs extends JavaPlugin {
     protected Material createMat, disableMat, ignoreMat, extraDamageMat, igniteChanceMat, teleportMat = null;
     protected String currentVersion = "ERROR";
     protected boolean notifyUpdates, extraDamage, igniteChance, teleport;
+    protected int extraDamageMax, igniteChanceMax, teleportMax;
     private BukkitTask targetDeterminer;
     private BukkitTask guardTicker;
     private Metrics metrics;
@@ -310,6 +311,9 @@ public class GuardDogs extends JavaPlugin {
                     extraDamage = true;
                     igniteChance = true;
                     teleport = true;
+                    extraDamageMax = 2;
+                    igniteChanceMax = 6;
+                    teleportMax = 16;
 
                     notifyUpdates = true;
                     return;
@@ -328,6 +332,9 @@ public class GuardDogs extends JavaPlugin {
                 extraDamage = true;
                 igniteChance = true;
                 teleport = true;
+                extraDamageMax = 2;
+                igniteChanceMax = 6;
+                teleportMax = 16;
 
                 notifyUpdates = true;
                 return;
@@ -363,6 +370,9 @@ public class GuardDogs extends JavaPlugin {
                 extraDamage = true;
                 igniteChance = true;
                 teleport = true;
+                extraDamageMax = 2;
+                igniteChanceMax = 6;
+                teleportMax = 16;
 
                 notifyUpdates = true;
                 break;
@@ -379,6 +389,9 @@ public class GuardDogs extends JavaPlugin {
                 extraDamage = true;
                 igniteChance = true;
                 teleport = true;
+                extraDamageMax = 2;
+                igniteChanceMax = 6;
+                teleportMax = 16;
 
                 notifyUpdates = true;
                 break;
@@ -394,6 +407,9 @@ public class GuardDogs extends JavaPlugin {
                 extraDamage = config.getBoolean("special.extraDamage");
                 igniteChance = config.getBoolean("special.igniteChance");
                 teleport = config.getBoolean("special.teleport");
+                extraDamageMax = config.getInt("special.extraDamageMax");
+                igniteChanceMax = config.getInt("special.igniteChanceMax");
+                teleportMax = config.getInt("special.teleportMax");
 
                 notifyUpdates = config.getBoolean("notifyUpdates");
                 break;
@@ -645,7 +661,7 @@ public class GuardDogs extends JavaPlugin {
                                     "dog with " + ChatColor.AQUA + args[2] + ChatColor.GREEN + " to increase its " +
                                     "chance of ignote its enemies.");
                         } else {
-                            sender.sendMessage(ChatColor.RED + args[2] + "is not a valid material!");
+                            sender.sendMessage(ChatColor.RED + args[2] + " is not a valid material!");
                         }
                         break;
                     case "teleport":
@@ -653,8 +669,11 @@ public class GuardDogs extends JavaPlugin {
                             teleportMat = tmp;
                             sender.sendMessage(ChatColor.GREEN + "Material changed. From now on, right click a guard " +
                                     "dog with " + ChatColor.AQUA + args[2] + ChatColor.GREEN + " to allow it to " +
-                                    "teleport to it's home location when it's low on health.");
+                                    "teleport to its home location when it's low on health.");
+                        } else {
+                            sender.sendMessage(ChatColor.RED + args[2] + " is not a valid material");
                         }
+                        break;
                     default:
                         sender.sendMessage(ChatColor.RED + "/guarddogs materials [create|disable|ignore] [Material] " +
                                 ChatColor.GOLD + "- set the material required to perform the specified guard dog action");
@@ -666,75 +685,49 @@ public class GuardDogs extends JavaPlugin {
                 return true;
             }
 
+            if (args.length == 3 && args[0].equalsIgnoreCase("max")) {
+                switch (args[1]) {
+                    case "extradamage":
+                        extraDamageMax = Integer.parseInt(args[2]);
+                        sender.sendMessage(ChatColor.GREEN + "Guard Dogs on this server will from now on be able to " +
+                                "deal up to " + args[2] + " extra damage. Existing higher values have not been reset.");
+                        break;
+                    case "ignitechance":
+                        if (Integer.parseInt(args[2]) <= 10) {
+                            igniteChanceMax = Integer.parseInt(args[2]);
+                            sender.sendMessage(ChatColor.GREEN + "Guard Dogs on this server will from now on be able to " +
+                                    "have a maximum chance of " + args[2] + "0% to set their enemies on fire. Existing " +
+                                    "higher values have not been reset.");
+                        } else {
+                            sender.sendMessage(ChatColor.DARK_AQUA  + "ignitechance" + ChatColor.RED + " is counted " +
+                                    "in setps of 10%, so 10 (100%) is maximum.");
+                        }
+                        break;
+                    case "teleport":
+                        teleportMax = Integer.parseInt(args[2]);
+                        sender.sendMessage(ChatColor.GREEN + "Guard Dogs on this server will from now on be able to " +
+                                "teleport home when lowon health for up to " + args[2] + " times. Existing higher " +
+                                "values have not been reset.");
+                        break;
+                    default:
+                        sender.sendMessage(ChatColor.RED + "/guarddogs max [extradamage|ignitechance|teleport] " +
+                                "[maximum]" + ChatColor.GOLD + " - set the maximum for the specified guard dog action.");
+                        sender.sendMessage(ChatColor.DARK_AQUA + "extradamage" + ChatColor.GOLD + " - sets the " +
+                                "maximum amount of extra damage a guard dog can deal. Counted if half-hearts.");
+                        sender.sendMessage(ChatColor.DARK_AQUA + "ignitechance" + ChatColor.GOLD + " - sets the " +
+                                "maximum chance of setting an enemy on fire that a guard dog can have. Counted in " +
+                                "10%, maximum is 10 (100%).");
+                        sender.sendMessage(ChatColor.DARK_AQUA + "teleport" + ChatColor.GOLD + " - sets the maximum " +
+                                "amount of times a guard dog can teleport home when low on health.");
+                        break;
+                }
+
+                return true;
+            }
         }
 
         return false;
     }
-
-
-    // Currently working on replacement....
-    /* public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
-        if (cmd.getName().equalsIgnoreCase("guarddogs")) {
-            if (sender instanceof Player) {
-                if (!sender.hasPermission("guarddogs.admin")) {
-                    sender.sendMessage(ChatColor.RED + "Sorry, but you don't have permission to edit guard dogs iems.");
-                    return true;
-                }
-            }
-
-            if (args.length == 0) {
-                sender.sendMessage(ChatColor.GREEN + "You are running " + ChatColor.DARK_GREEN + "Guard Dogs" +
-                        ChatColor.GREEN + " version " + ChatColor.AQUA + getDescription().getVersion());
-                return true;
-            }
-
-            if (args.length != 2) {
-                sender.sendMessage(ChatColor.RED + "Usage: /guarddogs [create|disable|ignore] [Material]" +
-                        ChatColor.GRAY + " - " + ChatColor.GREEN + "Changes the item you need to right click a wolf " +
-                        "with in order to perform the specified action.");
-                return true;
-            }
-
-            if (args[0].equalsIgnoreCase("create")) {
-                Material tmp = Material.getMaterial(args[1]);
-                if (tmp != null) {
-                    createMat = tmp;
-                    sender.sendMessage(ChatColor.GREEN + "Material changed. From now on, right click a tamed wolf " +
-                            "with " + ChatColor.AQUA + args[1] + ChatColor.GREEN + " to make it a guard dog.");
-                } else {
-                    sender.sendMessage(ChatColor.RED + args[1] + " is not a valid material!");
-                }
-                return true;
-            } else if (args[0].equalsIgnoreCase("disable")) {
-                Material tmp = Material.getMaterial(args[1]);
-                if (tmp != null) {
-                    disableMat = tmp;
-                    sender.sendMessage(ChatColor.GREEN + "Material changed. From now on, right click a guard dog " +
-                            "with " + ChatColor.AQUA + args[1] + ChatColor.GREEN + " to disable it.");
-                } else {
-                    sender.sendMessage(ChatColor.RED + args[1] + " is not a valid material!");
-                }
-                return true;
-            } else if (args[0].equalsIgnoreCase("ignore")) {
-                Material tmp = Material.getMaterial(args[1]);
-                if (tmp != null) {
-                    ignoreMat = tmp;
-                    sender.sendMessage(ChatColor.GREEN + "Material changed. From now on, right click a guard dog " +
-                            "with " + ChatColor.AQUA + args[1] + ChatColor.GREEN + " to make it ignore a player.");
-                } else {
-                    sender.sendMessage(ChatColor.RED + args[1] + " is not a valid material!");
-                }
-                return true;
-            } else {
-                sender.sendMessage(ChatColor.RED + "Usage: /guarddogs [create|disable|ignore] [Material]" +
-                        ChatColor.GRAY + " - " + ChatColor.GREEN + "Changes the item you need to right click a wolf " +
-                        "with in order to perform the specified action.");
-                return true;
-            }
-        }
-
-        return false;
-    } */
 
     private void sendHelp(CommandSender sender) {
         sender.sendMessage(ChatColor.RED + "/guarddogs version" + ChatColor.GOLD + " - displays version " +
@@ -748,5 +741,7 @@ public class GuardDogs extends JavaPlugin {
                 " - enables or disables the on-join update alert for admins");
         sender.sendMessage(ChatColor.RED + "/guarddogs [enable|disable] [extradamage|ignitechance|teleport]" +
                 ChatColor.GOLD + " - enables or disables the specified guard dog special ability");
+        sender.sendMessage(ChatColor.RED + "/guarddogs max [extradamage|ignitechance|teleport] [maximum]" +
+                ChatColor.GOLD + " - sets the maximum for the specified guard dog special ability.");
     }
 }
