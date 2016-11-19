@@ -36,7 +36,7 @@
 
     <groupId>org.bitbucket.ardimaster</groupId>
     <artifactId>GuardDogs</artifactId>
-    <version>0.7</version>
+    <version>0.7.1-SNAPSHOT</version>
 
     <build>
         <plugins>
@@ -55,8 +55,8 @@
     <repositories>
         <!-- Bukkit can be found at the following repository -->
         <repository>
-            <id>bukkit-repo</id>
-            <url>http://repo.bukkit.org/content/groups/public/</url>
+            <id>spigot-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
     </repositories>
     <dependencies>
@@ -66,7 +66,7 @@
             <artifactId>bukkit</artifactId>
             <scope>provided</scope>
             <!-- Bukkit API Version, change if necessary -->
-            <version>1.7.9-R0.2</version>
+            <version>1.11-R0.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>
