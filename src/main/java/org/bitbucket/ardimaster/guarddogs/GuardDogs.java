@@ -72,7 +72,6 @@ public class GuardDogs extends JavaPlugin {
     protected int extraDamageMax, igniteChanceMax, teleportMax;
     private BukkitTask targetDeterminer;
     private BukkitTask guardTicker;
-    private Metrics metrics;
 
     @Override
     public void onEnable() {
@@ -80,13 +79,6 @@ public class GuardDogs extends JavaPlugin {
         targetDeterminer = new TargetDeterminer(this).runTaskTimer(this, 30 * 20, 10);
         guardTicker = new GuardTicker(this).runTaskTimer(this, 15 * 20, 10);
         getServer().getPluginManager().registerEvents(new EventListener(this), this);
-        try {
-            metrics = new Metrics(this);
-            metrics.start();
-        } catch (IOException e) {
-            log(Level.WARNING, "Could not start metrics! Is outbound communication blocked, or is the server offline?");
-            e.printStackTrace();
-        }
 
         getServer().getScheduler().runTaskAsynchronously(this, new Runnable() {
             /**
