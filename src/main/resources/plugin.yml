@@ -1,6 +1,6 @@
 name: GuardDogs
-version: 0.7
-main: org.bitbucket.ardimaster.guarddogs.GuardDogs
+version: 0.7.1-SNAPSHOT
+main: me.ardimaster.guarddogs.GuardDogs
 author: ArdiMaster
 
 commands:

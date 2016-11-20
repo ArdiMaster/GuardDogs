@@ -28,7 +28,7 @@
  * DAMAGE.
  */
 
-package org.bitbucket.ardimaster.guarddogs;
+package me.ardimaster.guarddogs;
 
 import org.bukkit.*;
 import org.bukkit.command.Command;

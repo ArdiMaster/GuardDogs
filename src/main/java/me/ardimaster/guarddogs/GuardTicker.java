@@ -28,7 +28,7 @@
  * DAMAGE.
  */
 
-package org.bitbucket.ardimaster.guarddogs;
+package me.ardimaster.guarddogs;
 
 import org.bukkit.entity.Wolf;
 import org.bukkit.scheduler.BukkitRunnable;
