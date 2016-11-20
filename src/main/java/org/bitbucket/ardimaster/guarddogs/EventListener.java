@@ -52,7 +52,7 @@ import java.util.Random;
  * The Bukkit event listening class for the GuardDogs plugin.
  */
 public class EventListener implements Listener {
-    protected GuardDogs plugin;
+    private GuardDogs plugin;
     private Random random = new Random();
 
     /**
@@ -171,7 +171,7 @@ public class EventListener implements Listener {
                 return;
             }
 
-            if (!plugin.extraDamage) {
+            if (!plugin.igniteChance) {
                 player.sendMessage(ChatColor.RED + "Guard dogs igniting their enemies is disabled on this server!");
                 return;
             }
@@ -200,7 +200,7 @@ public class EventListener implements Listener {
                 return;
             }
 
-            if (!plugin.extraDamage) {
+            if (!plugin.teleport) {
                 player.sendMessage(ChatColor.RED + "Guard dogs teleporting home when low on health is disabled " +
                         "on this server!");
                 return;

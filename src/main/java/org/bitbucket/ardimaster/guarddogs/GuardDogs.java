@@ -56,21 +56,21 @@ import java.util.logging.Level;
  * @author ArdiMaster
  */
 public class GuardDogs extends JavaPlugin {
-    protected String configFileName = "config.yml";
-    protected HashSet<Wolf> guards = new HashSet<>();
-    protected HashMap<Wolf, LivingEntity> guardTargets = new HashMap<>();
-    protected HashMap<Wolf, Location> guardPositions = new HashMap<>();
-    protected HashMap<Wolf, Integer> guardWaits = new HashMap<>();
-    protected HashMap<Wolf, HashSet<String>> guardIgnores = new HashMap<>();
-    protected HashMap<Player, Wolf> settingIgnore = new HashMap<>();
-    protected HashMap<Wolf, Integer> guardExtraDamage = new HashMap<>();
-    protected HashMap<Wolf, Integer> guardIgniteChance = new HashMap<>();
-    protected HashMap<Wolf, Integer> guardTeleportCount = new HashMap<>();
-    protected boolean targetDetermination = false;
-    protected Material createMat, disableMat, ignoreMat, extraDamageMat, igniteChanceMat, teleportMat = null;
-    protected String currentVersion = "ERROR";
-    protected boolean notifyUpdates, extraDamage, igniteChance, teleport;
-    protected int extraDamageMax, igniteChanceMax, teleportMax;
+    private String configFileName = "config.yml";
+    HashSet<Wolf> guards = new HashSet<>();
+    HashMap<Wolf, LivingEntity> guardTargets = new HashMap<>();
+    HashMap<Wolf, Location> guardPositions = new HashMap<>();
+    HashMap<Wolf, Integer> guardWaits = new HashMap<>();
+    HashMap<Wolf, HashSet<String>> guardIgnores = new HashMap<>();
+    HashMap<Player, Wolf> settingIgnore = new HashMap<>();
+    HashMap<Wolf, Integer> guardExtraDamage = new HashMap<>();
+    HashMap<Wolf, Integer> guardIgniteChance = new HashMap<>();
+    HashMap<Wolf, Integer> guardTeleportCount = new HashMap<>();
+    boolean targetDetermination = false;
+    Material createMat, disableMat, ignoreMat, extraDamageMat, igniteChanceMat, teleportMat = null;
+    String currentVersion = "ERROR";
+    boolean notifyUpdates, extraDamage, igniteChance, teleport;
+    int extraDamageMax, igniteChanceMax, teleportMax;
     private BukkitTask targetDeterminer;
     private BukkitTask guardTicker;
 
