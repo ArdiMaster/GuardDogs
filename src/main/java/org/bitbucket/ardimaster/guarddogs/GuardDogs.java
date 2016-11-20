@@ -52,6 +52,7 @@ import java.util.*;
 import java.util.logging.Level;
 
 /**
+ * The plugin's main class.
  * @author ArdiMaster
  */
 public class GuardDogs extends JavaPlugin {
@@ -83,7 +84,7 @@ public class GuardDogs extends JavaPlugin {
         getServer().getScheduler().runTaskAsynchronously(this, new Runnable() {
             /**
              * Async method invoked by server on plugin initialization in order to determine
-             * the most recent available version of the plugin
+             * the most recent available version of the plugin.
              */
             @Override
             public void run() {
@@ -110,6 +111,9 @@ public class GuardDogs extends JavaPlugin {
         log(Level.INFO, "Plugin loaded and available!");
     }
 
+    /**
+     * Handles shutting down the plugin. Cancels timers and saves data.
+     */
     @Override
     public void onDisable() {
         targetDeterminer.cancel();
@@ -122,7 +126,7 @@ public class GuardDogs extends JavaPlugin {
     }
 
     /**
-     * This method handles the creation of guard dogs
+     * This method handles the creation of guard dogs.
      *
      * @param wolf The wolf supposed to become a guard dog
      * @param extraDamage How much extra damage the guard dog will deal
@@ -149,6 +153,10 @@ public class GuardDogs extends JavaPlugin {
         return true;
     }
 
+    /**
+     * Handles the death of a wolf in the world. If it was a guard dog, it will be removed from all timer checks.
+     * @param wolf The wolf which died.
+     */
     public void deadGuard(Wolf wolf) {
         if (!guards.contains(wolf)) {
             return;
@@ -183,6 +191,12 @@ public class GuardDogs extends JavaPlugin {
         }
     }
 
+    /**
+     * Attempts to remove the given wolf from the system.
+     * It will no longer function as a guard dog controlled by the plugin.
+     * @param wolf The wolf to be removed
+     * @return Whether the given wolf was a guard dog (true) or not (false).
+     */
     public boolean removeGuard(Wolf wolf) {
         if (!guards.contains(wolf)) {
             return false;
@@ -211,6 +225,9 @@ public class GuardDogs extends JavaPlugin {
         return true;
     }
 
+    /**
+     * Writes guard dogs and plugin settings to disk.
+     */
     public void saveGuards() {
         File configFile = new File(getDataFolder(), configFileName);
         if (configFile.exists()) {
@@ -277,6 +294,9 @@ public class GuardDogs extends JavaPlugin {
 
     }
 
+    /**
+     * Loads guard dogs and plugin settings from disk.
+     */
     protected void loadGuards() {
         String configVersion = "unknown";
         File configFile = new File(getDataFolder(), configFileName);
@@ -481,6 +501,14 @@ public class GuardDogs extends JavaPlugin {
         log(Level.INFO, "Loading of config [config file of plugin version " + configVersion + "] completed.");
     }
 
+    /**
+     * Handles commands entered by a player or through the console.
+     * @param sender The command issuer
+     * @param cmd The command entered
+     * @param commandLabel A default Bukkit parameter whose use is unknown to me.
+     * @param args The command arguments entered
+     * @return Whether the command processed successfully.
+     */
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
         if (cmd.getName().equalsIgnoreCase("guarddogs")) {
             if (sender instanceof Player) {
@@ -721,6 +749,10 @@ public class GuardDogs extends JavaPlugin {
         return false;
     }
 
+    /**
+     * Sends command help message.
+     * @param sender The player&nbsp;/ console to send help to.
+     */
     private void sendHelp(CommandSender sender) {
         sender.sendMessage(ChatColor.RED + "/guarddogs version" + ChatColor.GOLD + " - displays version " +
                 "information");

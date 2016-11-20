@@ -34,6 +34,7 @@ import org.bukkit.entity.Wolf;
 import org.bukkit.scheduler.BukkitRunnable;
 
 /**
+ * Timer handling guard dog cooldowns and resetting stray guard dogs.
  * @author ArdiMaster
  */
 public class GuardTicker extends BukkitRunnable {

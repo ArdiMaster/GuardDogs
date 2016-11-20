@@ -49,16 +49,26 @@ import java.util.HashSet;
 import java.util.Random;
 
 /**
- * The Bukkit event listening class for the GuardDogs plugin
+ * The Bukkit event listening class for the GuardDogs plugin.
  */
 public class EventListener implements Listener {
     protected GuardDogs plugin;
     private Random random = new Random();
 
+    /**
+     * Constructor of the EventListener class.
+     * @param plugin The current instance of the plugin's main class.
+     */
     public EventListener(GuardDogs plugin) {
         this.plugin = plugin;
     }
 
+    /**
+     * Handles players interacting with entities.
+     * When a wolf&nbsp;/ guard dog is right-clicked with the appropriate item in hand, this method will check whether
+     * the action is valid and perform the requested action.
+     * @param event The PlayerInteractEntityEvent to be handled.
+     */
     @EventHandler
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
         if (!(event.getRightClicked() instanceof Wolf)) {
@@ -212,6 +222,10 @@ public class EventListener implements Listener {
 
     }
 
+    /**
+     * Handles entities damaging each other. Applies guard dog special abilities.
+     * @param event The EntitiyDamageByEntityEvent to be handled.
+     */
     @EventHandler
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
         if (event.getDamager() instanceof Wolf) {
@@ -250,6 +264,10 @@ public class EventListener implements Listener {
         }
     }
 
+    /**
+     * Handles the death of a guard dog or a guard dog's target.
+     * @param event The EntityDeathEvent to be handled.
+     */
     @EventHandler
     public void onEntityDeath(EntityDeathEvent event) {
         if (event.getEntity() instanceof Wolf) {
@@ -274,6 +292,10 @@ public class EventListener implements Listener {
         }
     }
 
+    /**
+     * Handles chat events. Used for adding ignored players to GuardDogs.
+     * @param event The AsyncPlayerChatEvent to be handled.
+     */
     @EventHandler
     @SuppressWarnings("deprecation")
     public void onPlayerChat(AsyncPlayerChatEvent event) {
@@ -310,6 +332,10 @@ public class EventListener implements Listener {
         player.sendMessage(ChatColor.DARK_GREEN + event.getMessage() + ChatColor.GREEN + " successfully added.");
     }
 
+    /**
+     * Handles players joining the server. Used to alert admins of new versions.
+     * @param event The PlayerJoinEvent to be handled.
+     */
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         if (plugin.currentVersion.equals("ERROR") ||

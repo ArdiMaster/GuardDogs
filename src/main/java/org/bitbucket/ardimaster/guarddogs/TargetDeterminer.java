@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Random;
 
 /**
+ * Timer assigning targets to idle guard dogs.
  * @author ArdiMaster
  */
 public class TargetDeterminer extends BukkitRunnable {
