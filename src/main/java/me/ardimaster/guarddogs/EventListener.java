@@ -85,7 +85,7 @@ public class EventListener implements Listener {
                 return;
             }
 
-            if (!wolf.getOwner().equals(player)) {
+            if (!Objects.equals(wolf.getOwner(), player)) {
                 player.sendMessage(ChatColor.RED + "You can't make this dog your guard dog as it isn't yours!");
                 return;
             }
@@ -98,11 +98,7 @@ public class EventListener implements Listener {
             }
 
         } else if (player.getItemInHand().getType().equals(plugin.disableMat)) {
-            if (!wolf.isTamed() || !wolf.getOwner().equals(player)) {
-                player.sendMessage(ChatColor.RED + "This isn't your dog. Thus, it can't be your guard dog. " +
-                        "Thus, you can't disable it.");
-                return;
-            }
+            if (checkRule_ShouldRefuseNonGuards(player, wolf, "disable it")) return;
 
             if (plugin.removeGuard(wolf)) {
                 player.sendMessage(ChatColor.DARK_GREEN + "Guard dog " + ChatColor.AQUA + "disabled.");
@@ -110,12 +106,8 @@ public class EventListener implements Listener {
                 player.sendMessage(ChatColor.RED + "This isn't a guard dog, it's just a normal dog!");
             }
         } else if (player.getItemInHand().getType().equals(plugin.ignoreMat)) {
-            if (!wolf.isTamed() || !wolf.getOwner().equals(player)) {
-                player.sendMessage(ChatColor.RED + "This isn't your dog. Thus, it can't be your guard dog. " +
-                        "Thus, you can't set it's ignores.");
-                return;
-            }
-
+            if (checkRule_ShouldRefuseWhatIsntYours(player, wolf, "set its ignores")) return;
+            if (checkRule_ShouldRefuseNonGuards(player, wolf, "set its ignores")) return;
             if (!plugin.guards.contains(wolf)) {
                 player.sendMessage(ChatColor.RED + "This isn't a guard dog. Thus, you can't set it's ignores.");
                 return;
@@ -131,17 +123,8 @@ public class EventListener implements Listener {
 
             plugin.settingIgnore.put(player, wolf);
         } else if (player.getItemInHand().getType().equals(plugin.extraDamageMat)) {
-            if (!wolf.isTamed() || !wolf.getOwner().equals(player)) {
-                player.sendMessage(ChatColor.RED + "This isn't your dog. Thus, it can't be your guard dog. " +
-                        "Thus, you can't have it deal extra damage.");
-                return;
-            }
-
-            if (!plugin.guards.contains(wolf)) {
-                player.sendMessage(ChatColor.RED + "This isn't a guard dog. Thus, you can't have it " +
-                        "deal extra damage.");
-                return;
-            }
+            if (checkRule_ShouldRefuseWhatIsntYours(player, wolf, "have it deal extra damage")) return;
+            if (checkRule_ShouldRefuseNonGuards(player, wolf, "have it deal extra damage")) return;
 
             if (!plugin.extraDamageEnabled) {
                 player.sendMessage(ChatColor.RED + "Guard dogs extra damage is disabled on this server!");
@@ -160,17 +143,8 @@ public class EventListener implements Listener {
                         "'s extra damage is already at maximum!");
             }
         } else if (player.getItemInHand().getType().equals(plugin.igniteChanceMat)) {
-            if (!wolf.isTamed() || !Objects.equals(wolf.getOwner(), player)) {
-                player.sendMessage(ChatColor.RED + "This isn't your dog. Thus, it can't be your guard dog. " +
-                        "Thus, you can't have it ignite its enemies.");
-                return;
-            }
-
-            if (!plugin.guards.contains(wolf)) {
-                player.sendMessage(ChatColor.RED + "This isn't a guard dog. Thus, you can't have it " +
-                        "ignite its enemies.");
-                return;
-            }
+            if (checkRule_ShouldRefuseWhatIsntYours(player, wolf, "have it ignite its enemies")) return;
+            if (checkRule_ShouldRefuseNonGuards(player, wolf, "have it ignite its enemies")) return;
 
             if (!plugin.igniteChanceEnabled) {
                 player.sendMessage(ChatColor.RED + "Guard dogs igniting their enemies is disabled on this server!");
@@ -189,17 +163,8 @@ public class EventListener implements Listener {
                         "'s chance to ignite its enemies is already at maximum!");
             }
         } else if (player.getItemInHand().getType().equals(plugin.teleportMat)) {
-            if (!wolf.isTamed() || !Objects.equals(wolf.getOwner(), player)) {
-                player.sendMessage(ChatColor.RED + "This isn't your dog. Thus, it can't be your guard dog. " +
-                        "Thus, you can't have it teleport home when it's low on health.");
-                return;
-            }
-
-            if (!plugin.guards.contains(wolf)) {
-                player.sendMessage(ChatColor.RED + "This isn't a guard dog. Thus, you can't have it " +
-                        "teleport home when it's low on health.");
-                return;
-            }
+            if (checkRule_ShouldRefuseWhatIsntYours(player, wolf, "have it teleport home")) return;
+            if (checkRule_ShouldRefuseNonGuards(player, wolf, "have it teleport home")) return;
 
             if (!plugin.teleportEnabled) {
                 player.sendMessage(ChatColor.RED + "Guard dogs teleporting home when low on health is disabled " +
@@ -221,6 +186,30 @@ public class EventListener implements Listener {
             }
         }
 
+    }
+
+    private boolean checkRule_ShouldRefuseNonGuards(Player player, Wolf wolf, String occasion) {
+        if (!plugin.guards.contains(wolf)) {
+            StringBuilder builder = new StringBuilder().append(ChatColor.RED).append("This isn't a guard dog.");
+            if (occasion != null && !occasion.isEmpty()){
+                builder.append(" Thus, you can't ").append(occasion).append('.');
+            }
+            player.sendMessage(builder.toString());
+            return true;
+        }
+        return false;
+    }
+
+    private boolean checkRule_ShouldRefuseWhatIsntYours(Player player, Wolf wolf, String occasion) {
+        if (!wolf.isTamed() || !Objects.equals(wolf.getOwner(), player)) {
+            StringBuilder builder = new StringBuilder().append(ChatColor.RED).append("This isn't your dog. Thus, it can't be your guard dog.");
+            if (occasion != null && !occasion.isEmpty()){
+                builder.append(" Thus, you can't ").append(occasion).append('.');
+            }
+            player.sendMessage(builder.toString());
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -298,7 +287,6 @@ public class EventListener implements Listener {
      * @param event The AsyncPlayerChatEvent to be handled.
      */
     @EventHandler
-    @SuppressWarnings("deprecation")
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         if (!plugin.settingIgnore.containsKey(event.getPlayer())) {
             return;
