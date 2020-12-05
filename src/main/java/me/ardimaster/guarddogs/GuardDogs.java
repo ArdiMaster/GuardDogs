@@ -257,8 +257,11 @@ public class GuardDogs extends JavaPlugin {
             config.set("id.igniteChance", igniteChanceMat.toString());
             config.set("id.teleport", teleportMat.toString());
             config.set("special.extraDamage", extraDamageEnabled);
+            config.set("special.extraDamageMax", extraDamageMax);
             config.set("special.igniteChance", igniteChanceEnabled);
+            config.set("special.igniteChanceMax", igniteChanceMax);
             config.set("special.teleport", teleportEnabled);
+            config.set("special.teleportMax", teleportMax);
             config.set("notifyUpdates", notifyUpdates);
         }
 
