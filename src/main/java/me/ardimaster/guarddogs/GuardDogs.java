@@ -80,32 +80,12 @@ public class GuardDogs extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new EventListener(this), this);
         this.getCommand("guarddogs").setExecutor(new GDCommand(this));
 
-        getServer().getScheduler().runTaskAsynchronously(this, new Runnable() {
-            /**
-             * Async method invoked by server on plugin initialization in order to determine
-             * the most recent available version of the plugin.
-             */
+        /* getServer().getScheduler().runTaskAsynchronously(this, new Runnable() {
             @Override
             public void run() {
-                try {
-                    URL url = new URL("http://files.diepixelecke.tk/GuardDogs/currentVersion.txt");
-                    Scanner s = new Scanner(url.openStream());
-                    currentVersion = s.nextLine();
-                    s.close();
-                    if (currentVersion.equals(getDescription().getVersion())) {
-                        log(Level.INFO, "Plugin up-to-date.");
-                    } else {
-                        log(Level.WARNING, "An update was found! The newest version is " + currentVersion +
-                                ", you are still running " + getDescription().getVersion() + "! Grab it at " +
-                                "http://dev.bukkit.org/bukkit-plugins/guard-dogs");
-                    }
-                } catch (IOException e) {
-                    log(Level.WARNING, "Could not check for updates! Please check manually at " +
-                            "http://dev.bukkit.org/bukkit-plugins/guard-dogs");
-                    e.printStackTrace();
-                }
+                // -- to be rewritten later --
             }
-        });
+        }); */
 
         log(Level.INFO, "Plugin loaded and available!");
     }
