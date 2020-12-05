@@ -162,23 +162,7 @@ public class GuardDogs extends JavaPlugin {
             return;
         }
 
-        guards.remove(wolf);
-        guardPositions.remove(wolf);
-        guardExtraDamage.remove(wolf);
-        guardIgniteChance.remove(wolf);
-        guardTeleportCount.remove(wolf);
-
-        if (guardTargets.containsKey(wolf)) {
-            guardTargets.remove(wolf);
-        }
-
-        if (guardIgnores.containsKey(wolf)) {
-            guardIgnores.remove(wolf);
-        }
-
-        if (guardWaits.containsKey(wolf)) {
-            guardWaits.remove(wolf);
-        }
+        disableGuard(wolf);
 
         log(Level.INFO, "A guard dog has died: " + wolf.getUniqueId().toString());
         saveGuards();
@@ -189,6 +173,17 @@ public class GuardDogs extends JavaPlugin {
                         ChatColor.RED + " has died.");
             }
         }
+    }
+
+    private void disableGuard(Wolf wolf) {
+        guards.remove(wolf);
+        guardPositions.remove(wolf);
+        guardExtraDamage.remove(wolf);
+        guardIgniteChance.remove(wolf);
+        guardTeleportCount.remove(wolf);
+        guardTargets.remove(wolf);
+        guardIgnores.remove(wolf);
+        guardWaits.remove(wolf);
     }
 
     /**
@@ -202,23 +197,7 @@ public class GuardDogs extends JavaPlugin {
             return false;
         }
 
-        guards.remove(wolf);
-        guardPositions.remove(wolf);
-        guardExtraDamage.remove(wolf);
-        guardIgniteChance.remove(wolf);
-        guardTeleportCount.remove(wolf);
-
-        if (guardTargets.containsKey(wolf)) {
-            guardTargets.remove(wolf);
-        }
-
-        if (guardIgnores.containsKey(wolf)) {
-            guardIgnores.remove(wolf);
-        }
-
-        if (guardWaits.containsKey(wolf)) {
-            guardWaits.remove(wolf);
-        }
+        disableGuard(wolf);
 
         log(Level.INFO, "A guard dog has been removed: " + wolf.getUniqueId().toString());
         saveGuards();
@@ -355,7 +334,7 @@ public class GuardDogs extends JavaPlugin {
 
         FileConfiguration config = YamlConfiguration.loadConfiguration(configFile);
 
-        if (configVersion.equals("unkown")) {
+        if (configVersion.equals("unknown")) {
             configVersion = config.getString("version");
         }
 

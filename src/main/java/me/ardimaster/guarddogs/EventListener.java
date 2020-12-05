@@ -46,14 +46,15 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Random;
 
 /**
  * The Bukkit event listening class for the GuardDogs plugin.
  */
 public class EventListener implements Listener {
-    private GuardDogs plugin;
-    private Random random = new Random();
+    private final GuardDogs plugin;
+    private final Random random = new Random();
 
     /**
      * Constructor of the EventListener class.
@@ -159,7 +160,7 @@ public class EventListener implements Listener {
                         "'s extra damage is already at maximum!");
             }
         } else if (player.getItemInHand().getType().equals(plugin.igniteChanceMat)) {
-            if (!wolf.isTamed() || !wolf.getOwner().equals(player)) {
+            if (!wolf.isTamed() || !Objects.equals(wolf.getOwner(), player)) {
                 player.sendMessage(ChatColor.RED + "This isn't your dog. Thus, it can't be your guard dog. " +
                         "Thus, you can't have it ignite its enemies.");
                 return;
@@ -188,7 +189,7 @@ public class EventListener implements Listener {
                         "'s chance to ignite its enemies is already at maximum!");
             }
         } else if (player.getItemInHand().getType().equals(plugin.teleportMat)) {
-            if (!wolf.isTamed() || !wolf.getOwner().equals(player)) {
+            if (!wolf.isTamed() || !Objects.equals(wolf.getOwner(), player)) {
                 player.sendMessage(ChatColor.RED + "This isn't your dog. Thus, it can't be your guard dog. " +
                         "Thus, you can't have it teleport home when it's low on health.");
                 return;
@@ -319,15 +320,14 @@ public class EventListener implements Listener {
             event.setCancelled(true);
             return;
         }
+        HashSet<String> ignores;
         if (plugin.guardIgnores.containsKey(wolf)) {
-            HashSet<String> ignores = plugin.guardIgnores.get(wolf);
-            ignores.add(event.getMessage());
-            plugin.guardIgnores.put(wolf, ignores);
+            ignores = plugin.guardIgnores.get(wolf);
         } else {
-            HashSet<String> ignores = new HashSet<>();
-            ignores.add(event.getMessage());
-            plugin.guardIgnores.put(wolf, ignores);
+            ignores = new HashSet<>();
         }
+        ignores.add(event.getMessage());
+        plugin.guardIgnores.put(wolf, ignores);
         event.setCancelled(true);
         player.sendMessage(ChatColor.DARK_GREEN + event.getMessage() + ChatColor.GREEN + " successfully added.");
     }

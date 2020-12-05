@@ -42,7 +42,7 @@ import java.util.Random;
  * @author ArdiMaster
  */
 public class TargetDeterminer extends BukkitRunnable {
-    private GuardDogs plugin;
+    private final GuardDogs plugin;
 
     public TargetDeterminer(GuardDogs plugin) {
         this.plugin = plugin;
