@@ -31,8 +31,6 @@
 package me.ardimaster.guarddogs;
 
 import org.bukkit.*;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.LivingEntity;
@@ -56,7 +54,7 @@ import java.util.logging.Level;
  * @author ArdiMaster
  */
 public class GuardDogs extends JavaPlugin {
-    private String configFileName = "config.yml";
+    private final String configFileName = "config.yml";
     HashSet<Wolf> guards = new HashSet<>();
     HashMap<Wolf, LivingEntity> guardTargets = new HashMap<>();
     HashMap<Wolf, Location> guardPositions = new HashMap<>();
@@ -69,7 +67,7 @@ public class GuardDogs extends JavaPlugin {
     boolean targetDetermination = false;
     Material createMat, disableMat, ignoreMat, extraDamageMat, igniteChanceMat, teleportMat = null;
     String currentVersion = "ERROR";
-    boolean notifyUpdates, extraDamage, igniteChance, teleport;
+    boolean notifyUpdates, extraDamageEnabled, igniteChanceEnabled, teleportEnabled;
     int extraDamageMax, igniteChanceMax, teleportMax;
     private BukkitTask targetDeterminer;
     private BukkitTask guardTicker;
@@ -210,19 +208,20 @@ public class GuardDogs extends JavaPlugin {
      */
     public void saveGuards() {
         File configFile = new File(getDataFolder(), configFileName);
+        boolean saveGuardsOnly = false;
         if (configFile.exists()) {
-            configFile.delete();
-        }
-
-        try {
-            if (!Files.exists(getDataFolder().toPath())) {
-                Files.createDirectory(getDataFolder().toPath());
+            saveGuardsOnly = true;
+        } else {
+            try {
+                if (!Files.exists(getDataFolder().toPath())) {
+                    Files.createDirectory(getDataFolder().toPath());
+                }
+                configFile.createNewFile();
+            } catch (IOException e) {
+                log(Level.WARNING, "Unable to create config file!");
+                e.printStackTrace();
+                return;
             }
-            configFile.createNewFile();
-        } catch (IOException e) {
-            log(Level.WARNING, "Unable to create config file!");
-            e.printStackTrace();
-            return;
         }
 
         FileConfiguration config = YamlConfiguration.loadConfiguration(configFile);
@@ -232,7 +231,7 @@ public class GuardDogs extends JavaPlugin {
             String id = wolf.getUniqueId().toString();
             Location loc = guardPositions.get(wolf);
             if (loc == null) {
-                throw new AssertionError("Attempting to save a guard dog whose position is null! Something went " +
+                throw new RuntimeException("Attempting to save a guard dog whose position is null! Something went " +
                         "terribly wrong here.");
             }
             guardIds.add(id);
@@ -245,24 +244,23 @@ public class GuardDogs extends JavaPlugin {
             config.set("guards." + id + ".teleports", guardTeleportCount.get(wolf));
 
             if (guardIgnores.containsKey(wolf)) {
-                ArrayList<String> ignores = new ArrayList<>();
-                for (String s : guardIgnores.get(wolf)) {
-                    ignores.add(s);
-                }
+                ArrayList<String> ignores = new ArrayList<>(guardIgnores.get(wolf));
                 config.set("guards." + id + ".ignores", ignores);
             }
         }
 
-        config.set("id.create", createMat.toString());
-        config.set("id.disable", disableMat.toString());
-        config.set("id.ignore", ignoreMat.toString());
-        config.set("id.extraDamage", extraDamageMat.toString());
-        config.set("id.igniteChance", igniteChanceMat.toString());
-        config.set("id.teleport", teleportMat.toString());
-        config.set("special.extraDamage", extraDamage);
-        config.set("special.igniteChance", igniteChance);
-        config.set("special.teleport", teleport);
-        config.set("notifyUpdates", notifyUpdates);
+        if (!saveGuardsOnly) {
+            config.set("id.create", createMat.toString());
+            config.set("id.disable", disableMat.toString());
+            config.set("id.ignore", ignoreMat.toString());
+            config.set("id.extraDamage", extraDamageMat.toString());
+            config.set("id.igniteChance", igniteChanceMat.toString());
+            config.set("id.teleport", teleportMat.toString());
+            config.set("special.extraDamage", extraDamageEnabled);
+            config.set("special.igniteChance", igniteChanceEnabled);
+            config.set("special.teleport", teleportEnabled);
+            config.set("notifyUpdates", notifyUpdates);
+        }
 
         config.set("guards.guardids", guardIds);
         config.set("version", getDescription().getVersion());
@@ -300,9 +298,9 @@ public class GuardDogs extends JavaPlugin {
                     igniteChanceMat = Material.BLAZE_POWDER;
                     teleportMat = Material.ENDER_PEARL;
 
-                    extraDamage = true;
-                    igniteChance = true;
-                    teleport = true;
+                    extraDamageEnabled = true;
+                    igniteChanceEnabled = true;
+                    teleportEnabled = true;
                     extraDamageMax = 2;
                     igniteChanceMax = 6;
                     teleportMax = 16;
@@ -321,9 +319,9 @@ public class GuardDogs extends JavaPlugin {
                 igniteChanceMat = Material.BLAZE_POWDER;
                 teleportMat = Material.ENDER_PEARL;
 
-                extraDamage = true;
-                igniteChance = true;
-                teleport = true;
+                extraDamageEnabled = true;
+                igniteChanceEnabled = true;
+                teleportEnabled = true;
                 extraDamageMax = 2;
                 igniteChanceMax = 6;
                 teleportMax = 16;
@@ -359,9 +357,9 @@ public class GuardDogs extends JavaPlugin {
                 igniteChanceMat = Material.BLAZE_POWDER;
                 teleportMat = Material.ENDER_PEARL;
 
-                extraDamage = true;
-                igniteChance = true;
-                teleport = true;
+                extraDamageEnabled = true;
+                igniteChanceEnabled = true;
+                teleportEnabled = true;
                 extraDamageMax = 2;
                 igniteChanceMax = 6;
                 teleportMax = 16;
@@ -378,9 +376,9 @@ public class GuardDogs extends JavaPlugin {
                 igniteChanceMat = Material.BLAZE_POWDER;
                 teleportMat = Material.ENDER_PEARL;
 
-                extraDamage = true;
-                igniteChance = true;
-                teleport = true;
+                extraDamageEnabled = true;
+                igniteChanceEnabled = true;
+                teleportEnabled = true;
                 extraDamageMax = 2;
                 igniteChanceMax = 6;
                 teleportMax = 16;
@@ -396,9 +394,9 @@ public class GuardDogs extends JavaPlugin {
                 igniteChanceMat = Material.getMaterial(config.getString("id.igniteChance"));
                 teleportMat = Material.getMaterial(config.getString("id.teleport"));
 
-                extraDamage = config.getBoolean("special.extraDamage");
-                igniteChance = config.getBoolean("special.igniteChance");
-                teleport = config.getBoolean("special.teleport");
+                extraDamageEnabled = config.getBoolean("special.extraDamage");
+                igniteChanceEnabled = config.getBoolean("special.igniteChance");
+                teleportEnabled = config.getBoolean("special.teleport");
                 extraDamageMax = config.getInt("special.extraDamageMax");
                 igniteChanceMax = config.getInt("special.igniteChanceMax");
                 teleportMax = config.getInt("special.teleportMax");
@@ -455,20 +453,14 @@ public class GuardDogs extends JavaPlugin {
                             case "0.5.6":
                                 if (config.contains(uuid + ".ignores")) {
                                     List<String> ignores = config.getStringList(uuid + ".ignores");
-                                    HashSet<String> putIgnores = new HashSet<>();
-                                    for (String s : ignores) {
-                                        putIgnores.add(s);
-                                    }
+                                    HashSet<String> putIgnores = new HashSet<>(ignores);
                                     guardIgnores.put(wolf, putIgnores);
                                 }
                                 break;
                             default:
                                 if (config.contains("guards." + uuid + ".ignores")) {
                                     List<String> ignores = config.getStringList("guards." + uuid + ".ignores");
-                                    HashSet<String> putIgnores = new HashSet<>();
-                                    for (String s : ignores) {
-                                        putIgnores.add(s);
-                                    }
+                                    HashSet<String> putIgnores = new HashSet<>(ignores);
                                     guardIgnores.put(wolf, putIgnores);
                                 }
                                 break;

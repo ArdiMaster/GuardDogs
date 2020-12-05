@@ -143,7 +143,7 @@ public class EventListener implements Listener {
                 return;
             }
 
-            if (!plugin.extraDamage) {
+            if (!plugin.extraDamageEnabled) {
                 player.sendMessage(ChatColor.RED + "Guard dogs extra damage is disabled on this server!");
                 return;
             }
@@ -172,7 +172,7 @@ public class EventListener implements Listener {
                 return;
             }
 
-            if (!plugin.igniteChance) {
+            if (!plugin.igniteChanceEnabled) {
                 player.sendMessage(ChatColor.RED + "Guard dogs igniting their enemies is disabled on this server!");
                 return;
             }
@@ -201,7 +201,7 @@ public class EventListener implements Listener {
                 return;
             }
 
-            if (!plugin.teleport) {
+            if (!plugin.teleportEnabled) {
                 player.sendMessage(ChatColor.RED + "Guard dogs teleporting home when low on health is disabled " +
                         "on this server!");
                 return;
