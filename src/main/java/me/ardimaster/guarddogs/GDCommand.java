@@ -43,6 +43,11 @@ public class GDCommand implements CommandExecutor {
             }
             return true;
         }
+        if (args.length == 1 && args[0].equalsIgnoreCase("reload")) {
+            plugin.saveGuards();
+            plugin.loadGuards();
+            sender.sendMessage("GuardDogs config reloaded.");
+        }
 
         if (args.length == 0 || (args.length == 1 && args[0].equals("help"))) {
             sendHelp(sender);
