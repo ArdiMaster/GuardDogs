@@ -83,7 +83,11 @@ public class TargetDeterminer extends BukkitRunnable {
                         if (e instanceof Player) {
                             if (plugin.guardIgnores.containsKey(wolf)) {
                                 String p = ((Player) e).getName();
-                                if (plugin.guardIgnores.get(wolf).contains(p)) {
+                                /*
+                                    Ignore a player if the ignore list is an ignore list and the player is listed
+                                    or if the ignore list is an attack list and the player is not listed.
+                                 */
+                                if (plugin.ignoreIsBlacklist ^ plugin.guardIgnores.get(wolf).contains(p)) {
                                     continue;
                                 }
                             }

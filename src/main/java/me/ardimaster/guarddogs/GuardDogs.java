@@ -67,7 +67,7 @@ public class GuardDogs extends JavaPlugin {
     boolean targetDetermination = false;
     Material createMat, disableMat, ignoreMat, extraDamageMat, igniteChanceMat, teleportMat = null;
     String currentVersion = "ERROR";
-    boolean notifyUpdates, extraDamageEnabled, igniteChanceEnabled, teleportEnabled;
+    boolean notifyUpdates, extraDamageEnabled, igniteChanceEnabled, teleportEnabled, ignoreIsBlacklist;
     int extraDamageMax, igniteChanceMax, teleportMax;
     private BukkitTask targetDeterminer;
     private BukkitTask guardTicker;
@@ -236,6 +236,7 @@ public class GuardDogs extends JavaPlugin {
             config.set("id.extraDamage", extraDamageMat.toString());
             config.set("id.igniteChance", igniteChanceMat.toString());
             config.set("id.teleport", teleportMat.toString());
+            config.set("ignoreIsBlacklist", ignoreIsBlacklist);
             config.set("special.extraDamage", extraDamageEnabled);
             config.set("special.extraDamageMax", extraDamageMax);
             config.set("special.igniteChance", igniteChanceEnabled);
@@ -335,6 +336,7 @@ public class GuardDogs extends JavaPlugin {
                 createMat = Material.PUMPKIN_SEEDS;
                 disableMat = Material.STICK;
                 ignoreMat = Material.GOLD_NUGGET;
+                ignoreIsBlacklist = false;
 
                 extraDamageMat = Material.DIAMOND;
                 igniteChanceMat = Material.BLAZE_POWDER;
@@ -354,6 +356,7 @@ public class GuardDogs extends JavaPlugin {
                 createMat = Material.getMaterial(config.getString("id.create"));
                 disableMat = Material.getMaterial(config.getString("id.disable"));
                 ignoreMat = Material.getMaterial(config.getString("id.ignore"));
+                ignoreIsBlacklist = false;
 
                 extraDamageMat = Material.DIAMOND;
                 igniteChanceMat = Material.BLAZE_POWDER;
@@ -368,10 +371,31 @@ public class GuardDogs extends JavaPlugin {
 
                 notifyUpdates = true;
                 break;
+            case "0.7":
+                createMat = Material.getMaterial(config.getString("id.create"));
+                disableMat = Material.getMaterial(config.getString("id.disable"));
+                ignoreMat = Material.getMaterial(config.getString("id.ignore"));
+                ignoreIsBlacklist = false;
+
+                extraDamageMat = Material.getMaterial(config.getString("id.extraDamage"));
+                igniteChanceMat = Material.getMaterial(config.getString("id.igniteChance"));
+                teleportMat = Material.getMaterial(config.getString("id.teleport"));
+
+                extraDamageEnabled = config.getBoolean("special.extraDamage");
+                igniteChanceEnabled = config.getBoolean("special.igniteChance");
+                teleportEnabled = config.getBoolean("special.teleport");
+                extraDamageMax = config.getInt("special.extraDamageMax");
+                igniteChanceMax = config.getInt("special.igniteChanceMax");
+                teleportMax = config.getInt("special.teleportMax");
+                ignoreIsBlacklist = config.getBoolean("ignoreIsBlacklist");
+
+                notifyUpdates = config.getBoolean("notifyUpdates");
+                break;
             default:
                 createMat = Material.getMaterial(config.getString("id.create"));
                 disableMat = Material.getMaterial(config.getString("id.disable"));
                 ignoreMat = Material.getMaterial(config.getString("id.ignore"));
+                ignoreIsBlacklist = config.getBoolean("ignoreIsBlacklist");
 
                 extraDamageMat = Material.getMaterial(config.getString("id.extraDamage"));
                 igniteChanceMat = Material.getMaterial(config.getString("id.igniteChance"));

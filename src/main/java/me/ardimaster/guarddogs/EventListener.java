@@ -48,6 +48,7 @@ import org.bukkit.potion.PotionEffectType;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Random;
+import java.util.logging.Level;
 
 /**
  * The Bukkit event listening class for the GuardDogs plugin.
@@ -195,6 +196,7 @@ public class EventListener implements Listener {
                 builder.append(" Thus, you can't ").append(occasion).append('.');
             }
             player.sendMessage(builder.toString());
+            plugin.log(Level.FINEST, "Denying " + player.getName() + " a guard action -- failed the Can't deal with non-guards rule.");
             return true;
         }
         return false;
@@ -207,6 +209,7 @@ public class EventListener implements Listener {
                 builder.append(" Thus, you can't ").append(occasion).append('.');
             }
             player.sendMessage(builder.toString());
+            plugin.log(Level.FINEST, "Denying " + player.getName() + " a guard action -- failed the Can't touch what isn't yours rule.");
             return true;
         }
         return false;
