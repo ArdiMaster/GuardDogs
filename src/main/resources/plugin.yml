@@ -5,7 +5,9 @@ author: ArdiMaster
 
 commands:
   guarddogs:
+    description: Administrative stuff for GuardDogs.
     usage: /guarddogs help
+    permission: guarddogs.admin
 
 permissions:
   guarddogs.admin:
